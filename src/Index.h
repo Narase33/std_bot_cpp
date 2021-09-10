@@ -18,26 +18,33 @@
 class Index {
 	public:
 		Index(const Thread& thread, const std::vector<Comment>& comments) {
-			spdlog::info("indexing new thread {}", thread.id());
+			spdlog::info("indexing new thread id {}", thread.id);
 
 			std::set<String> linksfromThread = thread.extractLinks();
 			spdlog::info("links: {}", String("\n").join(linksfromThread));
-			links.insert(linksfromThread.begin(), linksfromThread.end());
+			links.insert(std::make_move_iterator(linksfromThread.begin()),
+					std::make_move_iterator(linksfromThread.end()));
 
 			std::set<Token> tokensfromThread = thread.extractTokens();
 			spdlog::info("tokens: {}", String("\n").join(tokensfromThread));
-			opTokens.insert(tokensfromThread.begin(), tokensfromThread.end());
+			opTokens.insert(std::make_move_iterator(tokensfromThread.begin()),
+					std::make_move_iterator(tokensfromThread.end()));
 
 			for (const Comment& comment : comments) {
-				spdlog::info("indexing comment {}", comment.id());
-
-				std::set<String> foundLinksInComment = comment.extractLinks();
-				spdlog::info("links in comment: {}", String("\n").join(foundLinksInComment));
-
-				links.insert(foundLinksInComment.begin(), foundLinksInComment.end());
+				addToIndex(comment);
 			}
 
 			threadId = thread.id;
+		}
+
+		void addToIndex(const Comment& newComment) {
+			spdlog::info("indexing comment id {}", newComment.id);
+
+			std::set<String> foundLinksInComment = newComment.extractLinks();
+			spdlog::info("links in comment: {}", String("\n").join(foundLinksInComment));
+
+			links.insert(std::make_move_iterator(foundLinksInComment.begin()),
+					std::make_move_iterator(foundLinksInComment.end()));
 		}
 
 		void addToIndex(const LinkedToken& linkedToken) {

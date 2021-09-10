@@ -570,6 +570,22 @@ class String {
 			return _data.find(ch, pos);
 		}
 
+		bool contains(const string_type& str) const {
+			return find(str) != String::npos;
+		}
+
+		bool contains(const String& str) const {
+			return find(str) != String::npos;
+		}
+
+		bool contains(const value_type* str) const {
+			return find(str) != String::npos;
+		}
+
+		bool contains(const value_type& str) const {
+			return find(str) != String::npos;
+		}
+
 		size_type rfind(const string_type& str, size_type pos = npos) const {
 			return _data.rfind(str, pos);
 		}

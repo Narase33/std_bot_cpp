@@ -42,15 +42,15 @@ class Reddit {
 
 			const auto pos = std::partition(allComments.begin(), allComments.end(), [&](const Comment& c) {
 				return ((validCommentTimestamp - c.created) < 20)
-						and (c.author() != "std_bot")
-						and !commentCache.isKnown(c.id());
+						and (c.author != "std_bot")
+						and !commentCache.isKnown(c.id);
 			});
 
 			std::vector<Comment> filteredComments;
 			std::move(allComments.begin(), pos, std::back_inserter(filteredComments));
 
 			for (const Comment& comment : filteredComments) {
-				commentCache.add(comment.id());
+				commentCache.add(comment.id);
 			}
 
 			return filteredComments;
@@ -79,7 +79,7 @@ class Reddit {
 			params.emplace("text", payload.str());
 
 			const httplib::Result result = apiClient.Post("/api/comment", headers, params);
-			check(result, "Error state: ", static_cast<int>(result.error()), HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
 			check(result->status == 200, result->reason);
 
 			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) {
@@ -128,13 +128,13 @@ class Reddit {
 			addParams(data, "password", bot_password);
 
 			const httplib::Result result = tokenClient.Post("/api/v1/access_token", data.str(), "application/x-www-form-urlencoded");
-			check(result, "Error state: ", static_cast<int>(result.error()), HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
 			check(result->status == 200, result->reason);
 
 			const Json resultJson = Json::parse(result->body);
 
 			accessToken = resultJson["access_token"].get<std::string>();
-			accessTokenExpiration = resultJson["expires_in"].get<size_t>() + std::time(nullptr);
+			accessTokenExpiration = resultJson["expires_in"].get<size_t>() + std::time(nullptr) - 10;
 		}
 
 		Json oauthCall_get(const String& address) {
@@ -147,7 +147,7 @@ class Reddit {
 			headers.emplace("Authorization", ("bearer " + accessToken).str());
 
 			const httplib::Result result = apiClient.Get(address.c_str(), headers);
-			check(result, "Error state: ", static_cast<int>(result.error()), HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
 			check(result->status == 200, result->reason);
 
 			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) {

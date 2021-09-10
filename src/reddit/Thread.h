@@ -13,7 +13,8 @@
 #include "../../libs/json.hpp"
 using Json = nlohmann::json;
 
-struct Thread: public ResponseBase {
+class Thread: public ResponseBase {
+	public:
 		Thread(const Json& json) {
 			id = json["id"].get<String>();
 			selftext = replaceHtmlSymbols(json["selftext"].get<String>());
@@ -22,25 +23,29 @@ struct Thread: public ResponseBase {
 		}
 
 		std::set<Token> extractTokens() const {
-			return extractTokensFromLine(selftext() + title());
+			return extractTokensFromLine(selftext + title);
 		}
 
 		std::set<String> extractLinks() const {
-			return extractLinksFromLine(selftext() + title());
+			return extractLinksFromLine(selftext + title);
+		}
+
+		String toString() const {
+			return String("\n").concat(
+					attribute("id", id),
+					attribute("title", title),
+					attribute("link", link),
+					attribute("selftext", selftext));
 		}
 
 		friend std::ostream& operator<<(std::ostream& o, const Thread& t) {
-			return o << String("\n").concat(
-					t.id,
-					t.title,
-					t.link,
-					t.selftext);
+			return o << t.toString();
 		}
 
-		ATTRIBUTE(String, id);
-		ATTRIBUTE(String, selftext);
-		ATTRIBUTE(String, title);
-		ATTRIBUTE(String, link);
+		String id;
+		String selftext;
+		String title;
+		String link;
 };
 
 #endif /* SRC_THREAD_H_ */

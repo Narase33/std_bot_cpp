@@ -10,41 +10,6 @@
 
 #include "../libs/String.h"
 
-#define ATTRIBUTE(x, y) Attribute<x> y{#y}
-
-template<typename T>
-class Attribute {
-	public:
-		Attribute(const char* n) :
-				name(n) {
-		}
-
-		operator const T&() const {
-			return data;
-		}
-
-		Attribute& operator=(const T& t) {
-			data = t;
-			return *this;
-		}
-
-		const T& operator()() const {
-			return data;
-		}
-
-		const char* getName() const {
-			return name;
-		}
-
-		friend std::ostream& operator<<(std::ostream& o, const Attribute& a) {
-			return o << "[" << a.name << ": " << a.data << "]";
-		}
-
-	private:
-		T data;
-		const char* name;
-};
-
 template<typename T>
 void moveContent(std::vector<T>& to, std::vector<T>& from) {
 	to.insert(to.end(),

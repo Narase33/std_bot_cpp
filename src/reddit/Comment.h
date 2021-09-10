@@ -15,7 +15,8 @@ using Json = nlohmann::json;
 #include "../Tools.h"
 #include "../Token.h"
 
-struct Comment: public ResponseBase {
+class Comment: public ResponseBase {
+	public:
 		Comment(const Json& json) {
 			id = json["id"].get<String>();
 			body = replaceHtmlSymbols(json["body"].get<String>());
@@ -34,7 +35,7 @@ struct Comment: public ResponseBase {
 
 		std::set<Token> extractTokens() const {
 			std::set<Token> tokens;
-			for (const String& line : body().split('\n')) {
+			for (const String& line : body.split('\n')) {
 				if (line.starts_with('>') or line.starts_with("    ")) {
 					continue;
 				}
@@ -46,36 +47,34 @@ struct Comment: public ResponseBase {
 		}
 
 		std::set<String> extractLinks() const {
-			return extractLinksFromLine(body());
+			return extractLinksFromLine(body);
 		}
 
 		String toString() const {
-			std::ostringstream stream;
-			stream << *this;
-			return stream.str();
+			return String("\n").concat(
+					attribute("author", author),
+					attribute("isTopLevelComment", isTopLevelComment),
+					attribute("id", id),
+					attribute("parentId", parentId),
+					attribute("threadId", threadId),
+					attribute("link", link),
+					attribute("created", created),
+					attribute("body", body));
 		}
 
 		friend std::ostream& operator<<(std::ostream& o, const Comment& c) {
-			return o << String("\n").concat(
-					c.author,
-					c.isTopLevelComment,
-					c.id,
-					c.parentId,
-					c.threadId,
-					c.link,
-					c.created,
-					c.body);
+			return o << c.toString();
 		}
 
-		ATTRIBUTE(String, id);
-		ATTRIBUTE(String, parentId);
-		ATTRIBUTE(String, threadId);
-		ATTRIBUTE(String, body);
-		ATTRIBUTE(String, author);
-		ATTRIBUTE(String, fullName);
-		ATTRIBUTE(String, link);
-		ATTRIBUTE(size_t, created);
-		ATTRIBUTE(bool, isTopLevelComment);
+		String id;
+		String parentId;
+		String threadId;
+		String body;
+		String author;
+		String fullName;
+		String link;
+		size_t created;
+		bool isTopLevelComment;
 };
 
 #endif /* SRC_COMMENT_H_ */

@@ -66,7 +66,7 @@ class ResponseBase {
 			return tokens;
 		}
 
-		String replaceHtmlSymbols(String str) {
+		String replaceHtmlSymbols(String str) const {
 			str.replace_all("&amp;", "&");
 			str.replace_all("&quot;", "\"");
 			str.replace_all("&apos;", "'");
@@ -74,6 +74,13 @@ class ResponseBase {
 			str.replace_all("&lt;", "<");
 			str.replace_all("&#x200B;", "\"");
 			return str;
+		}
+
+		template<typename T>
+		String attribute(const char* name, const T& value) const {
+			std::ostringstream stream;
+			stream << "[" << name << ": " << value << "]";
+			return stream.str();
 		}
 };
 
