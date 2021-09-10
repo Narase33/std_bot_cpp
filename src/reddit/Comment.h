@@ -22,7 +22,7 @@ class Comment: public ResponseBase {
 			body = replaceHtmlSymbols(json["body"].get<String>());
 			author = json["author"].get<String>();
 			created = json["created"].get<size_t>();
-			fullName = json["link_id"].get<String>();
+			fullName = json["name"].get<String>();
 			link = "https://www.reddit.com" + json["permalink"].get<String>();
 
 			const String parentId_entry = json["parent_id"].get<String>();

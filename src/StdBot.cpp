@@ -13,7 +13,7 @@ Reddit reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
 std::set<String> ignoredUsers;
 
-const String signature = "\n\n---\n\n^(Last update: 10.09.21. Last Change: Bot is now C++!)[Repo](https:://github.com/Narase33/std_bot_cpp)";
+const String signature = "\n\n---\n\n^(Last update: 10.09.21. Last Change: Bot is now C++!)[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const String& threadId) {
 	Index* index = threadCache.find([&](const Index& i) {

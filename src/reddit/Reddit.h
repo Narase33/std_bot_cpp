@@ -99,7 +99,7 @@ class Reddit {
 
 		time_t lastCommentRequest;
 
-		Cache<String> commentCache { std::chrono::seconds(2) };
+		Cache<String> commentCache { std::chrono::minutes(1) };
 		httplib::Client apiClient { "https://oauth.reddit.com" };
 		httplib::Client tokenClient { "https://www.reddit.com" };
 
