@@ -111,8 +111,32 @@ void lookForBotCommands(const Comment& comment) {
 	}
 }
 
+void signalHandler(int signal) {
+	String signalName;
+	switch (signal) {
+		case SIGABRT:
+			signalName = "SIGABRT";
+			break;
+		case SIGSEGV:
+			signalName = "SIGSEGV";
+			break;
+		case SIGKILL:
+			signalName = "SIGKILL";
+			break;
+		default:
+			signalName = "unknown";
+	}
+
+	spdlog::critical("Received signal: {}", signalName);
+}
+
 int main() {
 	configureLogger();
+
+	std::signal(SIGABRT, signalHandler);
+	std::signal(SIGSEGV, signalHandler);
+	std::signal(SIGKILL, signalHandler);
+
 	loadData();
 
 	spdlog::info("Starting bot");
