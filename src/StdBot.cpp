@@ -141,10 +141,13 @@ int main() {
 				}
 
 				String reply = replyMessage(linkedTokens);
-				std::cout << reply << std::endl;
+				spdlog::info("Possible reply:\n{}", reply);
 
 				if (isReplyAllowed(comment)) {
 					reddit.comment(comment.fullName, std::move(reply));
+					spdlog::info("Reply sent");
+				} else {
+					spdlog::info("Reply canceled");
 				}
 
 				spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
