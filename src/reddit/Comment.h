@@ -36,7 +36,7 @@ class Comment: public ResponseBase {
 		std::set<Token> extractTokens() const {
 			std::set<Token> tokens;
 			for (const String& line : body.split('\n')) {
-				if (line.starts_with('>') or line.starts_with("    ")) {
+				if (line.starts_with('>') or line.starts_with("    ") or line.starts_with('\t')) {
 					continue;
 				}
 
