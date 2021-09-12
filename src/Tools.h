@@ -10,13 +10,6 @@
 
 #include "../libs/String.h"
 
-template<typename T>
-void moveContent(std::vector<T>& to, std::vector<T>& from) {
-	to.insert(to.end(),
-			std::make_move_iterator(from.begin()),
-			std::make_move_iterator(from.end()));
-}
-
 std::pair<String, size_t> snip(const String& source, const String& from, const String& to, size_t start = 0) {
 	const size_t begin = source.find(from, start);
 	if (begin != String::npos) {

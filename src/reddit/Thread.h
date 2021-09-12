@@ -22,6 +22,10 @@ class Thread: public ResponseBase {
 			link = "https://www.reddit.com" + json["permalink"].get<String>();
 		}
 
+		static bool isThreadJson(const Json& json) {
+			return ResponseBase::hasKeys(json, { "id", "selftext", "title", "permalink" });
+		}
+
 		std::set<Token> extractTokens() const {
 			return extractTokensFromLine(selftext + title);
 		}

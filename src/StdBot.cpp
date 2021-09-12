@@ -7,8 +7,6 @@
 #include "Token.h"
 #include "Linker.h"
 
-using namespace std::string_literals;
-
 Reddit reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
 std::set<String> ignoredUsers;
@@ -90,7 +88,7 @@ bool isReplyAllowed(const Comment& comment) {
 		replyAllowed = false;
 	}
 
-	if (comment.body.contains("!std")) {
+	if (comment.body.contains("!std") and !(comment.body.contains("!std ignore_me") or comment.body.contains("!std follow_me"))) {
 		replyAllowed = true;
 	}
 
@@ -130,12 +128,48 @@ void signalHandler(int signal) {
 	spdlog::critical("Received signal: {}", signalName);
 }
 
+void debugComment(const char* fullName) {
+	Linker linker;
+
+	const Comment comment = reddit.requestComment(fullName);
+	std::cout << comment << std::endl;
+
+	getIndex(comment.threadId)->addToIndex(comment);
+	lookForBotCommands(comment);
+
+	const std::set<Token> tokens = comment.extractTokens();
+	spdlog::info("tokens in comment: {}", String("\n").join(tokens));
+
+	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
+	spdlog::info("linked tokens: {}", String("\n").join(linkedTokens));
+
+	if (!addLinkedTokens(linkedTokens, comment.threadId)) {
+		spdlog::info("No tokens to link");
+		spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+		return;
+	}
+
+	String reply = replyMessage(linkedTokens);
+	spdlog::info("Possible reply:\n{}", reply);
+
+	if (isReplyAllowed(comment)) {
+		reddit.comment(comment.fullName, std::move(reply));
+		// spdlog::info("Reply sent");
+	} else {
+		spdlog::info("Reply canceled");
+	}
+
+	spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+}
+
 int main() {
 	configureLogger();
 
 	std::signal(SIGABRT, signalHandler);
 	std::signal(SIGSEGV, signalHandler);
 	std::signal(SIGKILL, signalHandler);
+
+	// debugComment("t1_hcf8ycv");
 
 	loadData();
 
@@ -146,6 +180,7 @@ int main() {
 	while (true) {
 		try {
 			const std::vector<Comment> comments = reddit.requestNewComments();
+
 			for (const Comment& comment : comments) {
 				spdlog::info("new comment:\n{}", comment.toString());
 

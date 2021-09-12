@@ -33,6 +33,10 @@ class Comment: public ResponseBase {
 			threadId = threadId_entry.substr(3); // t3_[...]
 		}
 
+		static bool isCommentJson(const Json& json) {
+			return ResponseBase::hasKeys(json, { "id", "body", "author", "created", "name", "permalink", "parent_id", "link_id" });
+		}
+
 		std::set<Token> extractTokens() const {
 			std::set<Token> tokens;
 			for (const String& line : body.split('\n')) {

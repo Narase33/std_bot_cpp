@@ -16,6 +16,8 @@
 
 #define HERE std::string("File: ") + __FILE__ + ", Func: " + __func__ + ", Line: " + std::to_string(__LINE__)
 
+using namespace std::string_literals;
+
 namespace fmt {
 	template<> struct formatter<String> : formatter<string_view> {
 			template<typename FormatContext>

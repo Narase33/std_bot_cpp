@@ -76,6 +76,16 @@ class ResponseBase {
 			return str;
 		}
 
+		static bool hasKeys(const Json& json, const std::initializer_list<const char*> keys) {
+			for (const char* key : keys) {
+				if (!json.contains(key)) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		template<typename T>
 		String attribute(const char* name, const T& value) const {
 			std::ostringstream stream;
