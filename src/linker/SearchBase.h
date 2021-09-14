@@ -18,13 +18,14 @@ class SearchBase {
 	protected:
 		bool isSubtoken(std::string_view str, std::string_view subtoken) const {
 			size_t i = 0;
-			for (; i < str.length(); i++) {
-				if (!(std::isalnum(str[i]) or (str[i] == '_') or (str[i] == ':'))) {
-					break;
-				}
-			}
+//			for (; i < str.length(); i++) {
+//				if (!(std::isalnum(str[i]) or (str[i] == '_') or (str[i] == ':'))) {
+//					break;
+//				}
+//			}
+			return str.starts_with(subtoken);
 
-			return str.substr(0, i) == subtoken;
+			//return str.substr(0, i) == subtoken;
 		}
 
 		std::optional<std::string_view> findLinkToSubtoken(const std::string& htmlPage, std::string_view subtoken, const std::string& capsulationBegin, const std::string& capsulationEnd) const {

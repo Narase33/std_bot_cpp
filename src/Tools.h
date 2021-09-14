@@ -118,4 +118,14 @@ std::pair<std::string_view, size_t> snip_between(std::string_view source, const 
 	return {"", 0};
 }
 
+std::string replaceHtmlSymbols(std::string str) {
+	str_tools::replace_all(str, "&amp;", "&");
+	str_tools::replace_all(str, "&quot;", "\"");
+	str_tools::replace_all(str, "&apos;", "'");
+	str_tools::replace_all(str, "&gt;", ">");
+	str_tools::replace_all(str, "&lt;", "<");
+	str_tools::replace_all(str, "&#x200B;", "\"");
+	return str;
+}
+
 #endif /* SRC_TOOLS_H_ */

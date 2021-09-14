@@ -12,6 +12,7 @@
 
 #include "SymbolIndexSearch.h"
 #include "EngineSearch.h"
+#include "HeaderSearch.h"
 
 class Linker {
 	public:
@@ -41,10 +42,11 @@ class Linker {
 		httplib::Client tokenClient { "https://en.cppreference.com" };
 		SymbolIndexSearch symbolSearch { tokenClient };
 		EngineSearch engineSearch { tokenClient };
+		HeaderSearch headerSearch { tokenClient };
 		const std::map<std::string, std::string> namespaceLinks = {
-				{ "std::chrono", "https://en.cppreference.com/w/cpp/chrono" },
-				{ "std::filesystem", "https://en.cppreference.com/w/cpp/filesystem" },
-				{ "std::ranges", "https://en.cppreference.com/w/cpp/ranges" }
+				{ "std::chrono", "/w/cpp/chrono" },
+				{ "std::filesystem", "/w/cpp/filesystem" },
+				{ "std::ranges", "/w/cpp/ranges" }
 		};
 
 		LinkedToken* searchForLink(const Token& token) {
@@ -61,6 +63,10 @@ class Linker {
 
 			if (link.empty()) {
 				link = engineSearch(token);
+			}
+
+			if (link.empty()) {
+				link = headerSearch(token);
 			}
 
 			if (link.empty()) {

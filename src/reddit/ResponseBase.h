@@ -39,9 +39,8 @@ class ResponseBase {
 			return links;
 		}
 
-		std::set<Token> extractTokensFromLine(std::string line) const { // TODO needs some love
+		std::set<Token> extractStdTokensFromLine(const std::string& line) const { // TODO needs some love
 			const std::string_view tokenStartString = "std::";
-			str_tools::replace_all(line, "\\_", "_");
 
 			std::set<Token> tokens;
 
@@ -68,14 +67,40 @@ class ResponseBase {
 			return tokens;
 		}
 
-		std::string replaceHtmlSymbols(std::string str) const {
-			str_tools::replace_all(str, "&amp;", "&");
-			str_tools::replace_all(str, "&quot;", "\"");
-			str_tools::replace_all(str, "&apos;", "'");
-			str_tools::replace_all(str, "&gt;", ">");
-			str_tools::replace_all(str, "&lt;", "<");
-			str_tools::replace_all(str, "&#x200B;", "\"");
-			return str;
+		std::set<Token> extractHeaderTokensFromLine(const std::string& line) const { // TODO needs some love
+			const std::string_view tokenStartString = "<";
+			const std::string_view tokenEndString = ">";
+
+			std::set<Token> tokens;
+
+			size_t tokenBegin = line.find(tokenStartString);
+			while (tokenBegin != std::string::npos) {
+				const size_t tokenEnd = line.find(tokenEndString, tokenBegin + tokenStartString.length());
+				if (tokenEnd == std::string::npos) {
+					break;
+				}
+
+				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin)));
+				tokenBegin = line.find(tokenStartString, tokenEnd);
+			}
+
+			return tokens;
+		}
+
+		std::set<Token> extractTokensFromLine(std::string line) const { // TODO needs some love
+			str_tools::replace_all(line, "\\_", "_");
+
+			std::set<Token> tokens;
+
+			std::set<Token> std_tokens = extractStdTokensFromLine(line);
+			tokens.insert(std::make_move_iterator(std_tokens.begin()),
+					std::make_move_iterator(std_tokens.end()));
+
+			std::set<Token> header_tokens = extractHeaderTokensFromLine(line);
+			tokens.insert(std::make_move_iterator(header_tokens.begin()),
+					std::make_move_iterator(header_tokens.end()));
+
+			return tokens;
 		}
 
 		static bool hasKeys(const Json& json, const std::initializer_list<const char*> keys) {

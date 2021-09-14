@@ -17,6 +17,10 @@ class SymbolIndexSearch: public SearchBase {
 		}
 
 		std::string operator()(const Token& token) {
+			if (token.type != Token::Type::std) {
+				return "";
+			}
+
 			const std::vector<std::string_view> subtokens = str_tools::split(token.content, "::");
 
 			httplib::Result result = tokenClient.Get("/w/cpp/symbol_index");

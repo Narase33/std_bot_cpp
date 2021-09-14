@@ -11,7 +11,7 @@ Reddit reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
 std::set<std::string> ignoredUsers;
 
-const std::string signature = "\n\n---\n\n^(Last update: 10.09.21. Last Change: Bot is now C++!)[Repo](https://github.com/Narase33/std_bot_cpp)";
+const std::string signature = "\n\n---\n\n^(Last update: 14.09.21. Last Change: Can now link headers like '<bitset>')[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const std::string& threadId) {
 	Index* index = threadCache.find([&](const Index& i) {
@@ -163,6 +163,33 @@ void debugComment(const char* fullName) {
 	spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 }
 
+void simpleTests() {
+	try {
+		Linker linker;
+
+		const LinkedToken* vector = linker.getLinkedToken(Token("std::vector"));
+		check(vector->link == "https://en.cppreference.com/w/cpp/container/vector", "'std::vector' link not found");
+
+		const LinkedToken* vector_pushBack = linker.getLinkedToken(Token("std::vector::push_back"));
+		check(vector_pushBack->link == "https://en.cppreference.com/w/cpp/container/vector/push_back", "'std::vector::push_back' link not found");
+
+		const LinkedToken* chrono = linker.getLinkedToken(Token("std::chrono"));
+		check(chrono->link == "https://en.cppreference.com/w/cpp/chrono", "'std::chrono' link not found");
+
+		const LinkedToken* chrono_seconds = linker.getLinkedToken(Token("std::chrono::seconds"));
+		check(chrono_seconds->link == "https://en.cppreference.com/w/cpp/chrono/duration", "'std::chrono::seconds' link not found");
+
+		const LinkedToken* chrono_duration = linker.getLinkedToken(Token("std::chrono::duration"));
+		check(chrono_duration->link == "https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search=std%3A%3Achrono%3A%3Aduration", "'std::chrono::duration' link not found");
+
+		const LinkedToken* bitset_header = linker.getLinkedToken(Token("<bitset>"));
+		check(bitset_header->link == "https://en.cppreference.com/w/cpp/header/bitset", "bitset header link not found");
+	} catch (std::runtime_error& e) {
+		spdlog::critical(e.what());
+		std::exit(-1);
+	}
+}
+
 int main() {
 	configureLogger();
 
@@ -171,6 +198,7 @@ int main() {
 	std::signal(SIGKILL, signalHandler);
 
 	// debugComment("t1_hcf8ycv");
+	// simpleTests();
 
 	loadData();
 

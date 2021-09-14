@@ -17,6 +17,10 @@ class EngineSearch: public SearchBase {
 		}
 
 		std::string operator()(const Token& token) {
+			if (token.type != Token::Type::std) {
+				return "";
+			}
+
 			std::string tokenName = token.content;
 			str_tools::replace_all(tokenName, "::", "%3A%3A");
 
