@@ -9,18 +9,20 @@
 #define SRC_REDDIT_RESPONSEBASE_H_
 
 #include <vector>
-#include "../../libs/String.h"
-#include "../Token.h"
+#include <string>
+#include "src/Token.h"
+
+#include "src/Tools.h"
 
 class ResponseBase {
 	protected:
-		std::set<String> extractLinksFromLine(const String& line) const { // TODO needs some love
-			const String httpStartString = "http";
+		std::set<std::string> extractLinksFromLine(const std::string& line) const { // TODO needs some love
+			const std::string httpStartString = "http";
 
-			std::set<String> links;
+			std::set<std::string> links;
 
 			size_t linkBegin = line.find(httpStartString);
-			while (linkBegin != String::npos) {
+			while (linkBegin != std::string::npos) {
 				size_t linkEnd = linkBegin + httpStartString.length();
 				while ((linkEnd < line.length()) and (!std::isspace(line[linkEnd]) and (line[linkEnd] != ')'))) {
 					linkEnd++;
@@ -37,14 +39,14 @@ class ResponseBase {
 			return links;
 		}
 
-		std::set<Token> extractTokensFromLine(String line) const { // TODO needs some love
-			const String tokenStartString = "std::";
-			line.replace_all("\\_", "_");
+		std::set<Token> extractTokensFromLine(std::string line) const { // TODO needs some love
+			const std::string_view tokenStartString = "std::";
+			str_tools::replace_all(line, "\\_", "_");
 
 			std::set<Token> tokens;
 
 			size_t tokenBegin = line.find(tokenStartString);
-			while (tokenBegin != String::npos) {
+			while (tokenBegin != std::string::npos) {
 				size_t tokenEnd = tokenBegin + tokenStartString.length();
 
 				while (tokenEnd < line.length()) {
@@ -66,13 +68,13 @@ class ResponseBase {
 			return tokens;
 		}
 
-		String replaceHtmlSymbols(String str) const {
-			str.replace_all("&amp;", "&");
-			str.replace_all("&quot;", "\"");
-			str.replace_all("&apos;", "'");
-			str.replace_all("&gt;", ">");
-			str.replace_all("&lt;", "<");
-			str.replace_all("&#x200B;", "\"");
+		std::string replaceHtmlSymbols(std::string str) const {
+			str_tools::replace_all(str, "&amp;", "&");
+			str_tools::replace_all(str, "&quot;", "\"");
+			str_tools::replace_all(str, "&apos;", "'");
+			str_tools::replace_all(str, "&gt;", ">");
+			str_tools::replace_all(str, "&lt;", "<");
+			str_tools::replace_all(str, "&#x200B;", "\"");
 			return str;
 		}
 
@@ -87,7 +89,7 @@ class ResponseBase {
 		}
 
 		template<typename T>
-		String attribute(const char* name, const T& value) const {
+		std::string attribute(const char* name, const T& value) const {
 			std::ostringstream stream;
 			stream << "[" << name << ": " << value << "]";
 			return stream.str();

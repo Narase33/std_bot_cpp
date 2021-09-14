@@ -8,28 +8,28 @@
 #ifndef SRC_COMMENT_H_
 #define SRC_COMMENT_H_
 
-#include "../../libs/json.hpp"
+#include "libs/json.hpp"
 using Json = nlohmann::json;
 
 #include "ResponseBase.h"
-#include "../Tools.h"
-#include "../Token.h"
+#include "src/Tools.h"
+#include "src/Token.h"
 
 class Comment: public ResponseBase {
 	public:
 		Comment(const Json& json) {
-			id = json["id"].get<String>();
-			body = replaceHtmlSymbols(json["body"].get<String>());
-			author = json["author"].get<String>();
+			id = json["id"].get<std::string>();
+			body = replaceHtmlSymbols(json["body"].get<std::string>());
+			author = json["author"].get<std::string>();
 			created = json["created"].get<size_t>();
-			fullName = json["name"].get<String>();
-			link = "https://www.reddit.com" + json["permalink"].get<String>();
+			fullName = json["name"].get<std::string>();
+			link = "https://www.reddit.com" + json["permalink"].get<std::string>();
 
-			const String parentId_entry = json["parent_id"].get<String>();
+			const std::string parentId_entry = json["parent_id"].get<std::string>();
 			parentId = parentId_entry.substr(3); // t1_[...], t3_[...]
 			isTopLevelComment = parentId_entry.starts_with("t3_");
 
-			const String threadId_entry = json["link_id"].get<String>();
+			const std::string threadId_entry = json["link_id"].get<std::string>();
 			threadId = threadId_entry.substr(3); // t3_[...]
 		}
 
@@ -37,25 +37,38 @@ class Comment: public ResponseBase {
 			return ResponseBase::hasKeys(json, { "id", "body", "author", "created", "name", "permalink", "parent_id", "link_id" });
 		}
 
-		std::set<Token> extractTokens() const {
-			std::set<Token> tokens;
-			for (const String& line : body.split('\n')) {
-				if (line.starts_with('>') or line.starts_with("    ") or line.starts_with('\t')) {
+		bool contains(std::string_view substr) const {
+			for (const std::string_view& line : str_tools::split(body, "\n")) {
+				if (line.starts_with(">") or line.starts_with("    ") or line.starts_with("\t")) {
 					continue;
 				}
 
-				std::set<Token> tokensFromLine = extractTokensFromLine(line);
+				if (line.find(substr) != std::string_view::npos) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		std::set<Token> extractTokens() const {
+			std::set<Token> tokens;
+			for (const std::string_view& line : str_tools::split(body, "\n")) {
+				if (line.starts_with('>') or line.starts_with("    ") or line.starts_with("\t")) {
+					continue;
+				}
+
+				std::set<Token> tokensFromLine = extractTokensFromLine(std::string(line));
 				tokens.insert(tokensFromLine.begin(), tokensFromLine.end());
 			}
 			return tokens;
 		}
 
-		std::set<String> extractLinks() const {
+		std::set<std::string> extractLinks() const {
 			return extractLinksFromLine(body);
 		}
 
-		String toString() const {
-			return String("\n").concat(
+		std::string toString() const {
+			return str_tools::concat("\n",
 					attribute("author", author),
 					attribute("isTopLevelComment", isTopLevelComment),
 					attribute("id", id),
@@ -70,13 +83,13 @@ class Comment: public ResponseBase {
 			return o << c.toString();
 		}
 
-		String id;
-		String parentId;
-		String threadId;
-		String body;
-		String author;
-		String fullName;
-		String link;
+		std::string id;
+		std::string parentId;
+		std::string threadId;
+		std::string body;
+		std::string author;
+		std::string fullName;
+		std::string link;
 		size_t created;
 		bool isTopLevelComment;
 };

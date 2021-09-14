@@ -13,21 +13,18 @@
 #include <ctime>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "../../libs/httplib.h"
+#include "libs/httplib.h"
 #undef CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include "Comment.h"
 #include "Thread.h"
-#include "../Settings.h"
-#include "../Check.h"
-#include "../Cache.h"
-#include "../Index.h"
+#include "src/Settings.h"
+#include "src/Cache.h"
+#include "src/Index.h"
 
 using std::chrono::operator ""h;
 using std::chrono::operator ""min;
 using std::chrono::operator ""s;
-
-using Clock = std::chrono::system_clock;
 
 class Reddit {
 	public:
@@ -35,20 +32,20 @@ class Reddit {
 			tokenClient.set_basic_auth(bot_id, bot_secret);
 		}
 
-		Comment requestComment(const String& fullName) {
+		Comment requestComment(const std::string& fullName) {
 			if (accessTokenExpiration < Clock::now()) {
 				requestAccessToken();
 			}
 
 			httplib::Headers headers;
 			headers.emplace("Content-Type", "application/json");
-			headers.emplace("Authorization", ("bearer " + accessToken).str());
+			headers.emplace("Authorization", "bearer " + accessToken);
 
 			httplib::Params params;
-			params.emplace("id", fullName.str());
+			params.emplace("id", fullName);
 
 			const httplib::Result result = apiClient.Get("/api/info", params, headers);
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
 
 			const Json jsonResult = Json::parse(result->body);
@@ -80,7 +77,7 @@ class Reddit {
 			return filteredComments;
 		}
 
-		std::pair<Thread, std::vector<Comment>> requestThread(const String& id) {
+		std::pair<Thread, std::vector<Comment>> requestThread(const std::string& id) {
 			const Json resultJson = oauthCall_get("/comments/" + id);
 
 			Thread parsedThread(resultJson[0]["data"]["children"][0]["data"]);
@@ -89,21 +86,21 @@ class Reddit {
 			return {std::move(parsedThread), std::move(parsedComments)};
 		}
 
-		Json comment(const String& parentFullName, String payload) {
+		Json comment(const std::string& parentFullName, std::string payload) {
 			if (accessTokenExpiration < Clock::now()) {
 				requestAccessToken();
 			}
 
 			httplib::Headers headers;
 			headers.emplace("Content-Type", "application/json");
-			headers.emplace("Authorization", ("bearer " + accessToken).str());
+			headers.emplace("Authorization", "bearer " + accessToken);
 
 			httplib::Params params;
-			params.emplace("parent", parentFullName.str());
-			params.emplace("text", payload.str());
+			params.emplace("parent", parentFullName);
+			params.emplace("text", payload);
 
 			const httplib::Result result = apiClient.Post("/api/comment", headers, params);
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
 
 			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) { // TODO Needs some delay
@@ -118,11 +115,11 @@ class Reddit {
 		}
 
 	private:
-		String accessToken;
+		std::string accessToken;
 		Clock::time_point accessTokenExpiration = Clock::time_point::min();
 		Clock::time_point lastCommentRequest = Clock::now();
 
-		Cache<String> commentCache { std::chrono::minutes(1) };
+		Cache<std::string> commentCache { std::chrono::minutes(1) };
 		httplib::Client apiClient { "https://oauth.reddit.com" };
 		httplib::Client tokenClient { "https://www.reddit.com" };
 
@@ -151,12 +148,12 @@ class Reddit {
 		void requestAccessToken() {
 			spdlog::info("Requesting new access token");
 
-			String data = "grant_type=password";
+			std::string data = "grant_type=password";
 			data += "&username="s + bot_name;
 			data += "&password="s + bot_password;
 
-			const httplib::Result result = tokenClient.Post("/api/v1/access_token", data.str(), "application/x-www-form-urlencoded");
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
+			const httplib::Result result = tokenClient.Post("/api/v1/access_token", data, "application/x-www-form-urlencoded");
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
 
 			const Json resultJson = Json::parse(result->body);
@@ -165,17 +162,17 @@ class Reddit {
 			accessTokenExpiration = std::chrono::seconds(resultJson["expires_in"].get<size_t>()) + Clock::now() - 10s;
 		}
 
-		Json oauthCall_get(const String& address) {
+		Json oauthCall_get(const std::string& address) {
 			if (accessTokenExpiration < Clock::now()) {
 				requestAccessToken();
 			}
 
 			httplib::Headers headers;
 			headers.emplace("Content-Type", "application/json");
-			headers.emplace("Authorization", ("bearer " + accessToken).str());
+			headers.emplace("Authorization", "bearer " + accessToken);
 
 			const httplib::Result result = apiClient.Get(address.c_str(), headers);
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", HERE);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
 
 			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) {

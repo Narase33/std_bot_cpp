@@ -8,12 +8,14 @@
 #ifndef SRC_TOKEN_H_
 #define SRC_TOKEN_H_
 
-#include <string>
+#include <compare>
+
+#include "Tools.h"
 
 struct Token {
-		Token(String _content) :
+		Token(std::string _content) :
 				content(std::move(_content)) {
-			content.replace_all("%3A", ":");
+			str_tools::replace_all(content, "%3A", ":");
 		}
 
 		bool operator==(const Token& other) const {
@@ -28,11 +30,11 @@ struct Token {
 			return o << "[content: " << t.content << "]";
 		}
 
-		String content;
+		std::string content;
 };
 
 struct LinkedToken {
-		LinkedToken(Token _token, String url) :
+		LinkedToken(Token _token, std::string url) :
 				token(std::move(_token)),
 						link(std::move(url)) {
 		}
@@ -53,12 +55,12 @@ struct LinkedToken {
 			return o << "[token: " << t.token << ", url: " << t.link << "]";
 		}
 
-		String toLink() const {
+		std::string toLink() const {
 			return "[" + token.content + "](" + link + ")";
 		}
 
 		Token token;
-		String link;
+		std::string link;
 };
 
 #endif /* SRC_TOKEN_H_ */

@@ -5,15 +5,15 @@
 #include "reddit/Reddit.h"
 #include "Index.h"
 #include "Token.h"
-#include "Linker.h"
+#include "linker/Linker.h"
 
 Reddit reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
-std::set<String> ignoredUsers;
+std::set<std::string> ignoredUsers;
 
-const String signature = "\n\n---\n\n^(Last update: 10.09.21. Last Change: Bot is now C++!)[Repo](https://github.com/Narase33/std_bot_cpp)";
+const std::string signature = "\n\n---\n\n^(Last update: 10.09.21. Last Change: Bot is now C++!)[Repo](https://github.com/Narase33/std_bot_cpp)";
 
-Index* getIndex(const String& threadId) {
+Index* getIndex(const std::string& threadId) {
 	Index* index = threadCache.find([&](const Index& i) {
 		return i.getThreadId() == threadId;
 	});
@@ -27,22 +27,22 @@ Index* getIndex(const String& threadId) {
 	return index;
 }
 
-bool addLinkedTokens(const std::set<LinkedToken>& linkedTokens, const String& threadId) {
+bool addLinkedTokens(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
 	Index* index = getIndex(threadId);
 
-	bool allTokensLinked = true;
+	bool allLinkedTokensKnown = true;
 	for (const LinkedToken& linkedToken : linkedTokens) {
-		allTokensLinked &= index->inIndex(linkedToken);
-		index->addToIndex(linkedToken);
+		allLinkedTokensKnown &= index->addToIndex(linkedToken);
 	}
 
-	return !allTokensLinked;
+	return !allLinkedTokensKnown;
 }
 
-String replyMessage(const std::set<LinkedToken>& linkedTokens) {
-	String outMessage = "Unlinked STL entries:";
+std::string replyMessage(const std::set<LinkedToken>& linkedTokens) {
+	std::string outMessage = "Unlinked STL entries:";
 	for (const LinkedToken& linkedToken : linkedTokens) {
-		outMessage += " " + linkedToken.toLink();
+		outMessage += " ";
+		outMessage += linkedToken.toLink();
 	}
 	return outMessage + signature;
 }
@@ -64,6 +64,7 @@ void configureLogger() {
 
 	spdlog::set_default_logger(logger);
 	spdlog::set_level(logLevel);
+	spdlog::flush_on(logLevel);
 }
 
 void loadData() {
@@ -76,7 +77,7 @@ void loadData() {
 
 void saveData() {
 	std::ofstream ignoredUsersFile("data/ignored_users.txt");
-	for (const String& ignoredUser : ignoredUsers) {
+	for (const std::string& ignoredUser : ignoredUsers) {
 		ignoredUsersFile << ignoredUser << "\n";
 	}
 }
@@ -88,7 +89,7 @@ bool isReplyAllowed(const Comment& comment) {
 		replyAllowed = false;
 	}
 
-	if (comment.body.contains("!std") and !(comment.body.contains("!std ignore_me") or comment.body.contains("!std follow_me"))) {
+	if (comment.contains("!std") and !(comment.contains("!std ignore_me") or comment.contains("!std follow_me"))) {
 		replyAllowed = true;
 	}
 
@@ -96,13 +97,13 @@ bool isReplyAllowed(const Comment& comment) {
 }
 
 void lookForBotCommands(const Comment& comment) {
-	if (comment.body.contains("!std ignore_me")) {
+	if (comment.contains("!std ignore_me")) {
 		ignoredUsers.insert(comment.author);
 		saveData();
 		reddit.comment(comment.fullName, "Alright, not following you anymore" + signature);
 	}
 
-	if (comment.body.contains("!std follow_me")) {
+	if (comment.contains("!std follow_me")) {
 		ignoredUsers.erase(comment.author);
 		saveData();
 		reddit.comment(comment.fullName, "Happy to follow you again" + signature);
@@ -110,7 +111,7 @@ void lookForBotCommands(const Comment& comment) {
 }
 
 void signalHandler(int signal) {
-	String signalName;
+	std::string signalName;
 	switch (signal) {
 		case SIGABRT:
 			signalName = "SIGABRT";
@@ -138,10 +139,10 @@ void debugComment(const char* fullName) {
 	lookForBotCommands(comment);
 
 	const std::set<Token> tokens = comment.extractTokens();
-	spdlog::info("tokens in comment: {}", String("\n").join(tokens));
+	spdlog::info("tokens in comment: {}", str_tools::join("\n", tokens));
 
 	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-	spdlog::info("linked tokens: {}", String("\n").join(linkedTokens));
+	spdlog::info("linked tokens: {}", str_tools::join("\n", linkedTokens));
 
 	if (!addLinkedTokens(linkedTokens, comment.threadId)) {
 		spdlog::info("No tokens to link");
@@ -149,7 +150,7 @@ void debugComment(const char* fullName) {
 		return;
 	}
 
-	String reply = replyMessage(linkedTokens);
+	std::string reply = replyMessage(linkedTokens);
 	spdlog::info("Possible reply:\n{}", reply);
 
 	if (isReplyAllowed(comment)) {
@@ -188,10 +189,10 @@ int main() {
 				lookForBotCommands(comment);
 
 				const std::set<Token> tokens = comment.extractTokens();
-				spdlog::info("tokens in comment: {}", String("\n").join(tokens));
+				spdlog::info("tokens in comment: {}", str_tools::join("\n", tokens));
 
 				const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-				spdlog::info("linked tokens: {}", String("\n").join(linkedTokens));
+				spdlog::info("linked tokens: {}", str_tools::join("\n", linkedTokens));
 
 				if (!addLinkedTokens(linkedTokens, comment.threadId)) {
 					spdlog::info("No tokens to link");
@@ -199,11 +200,11 @@ int main() {
 					continue;
 				}
 
-				String reply = replyMessage(linkedTokens);
+				std::string reply = replyMessage(linkedTokens);
 				spdlog::info("Possible reply:\n{}", reply);
 
 				if (isReplyAllowed(comment)) {
-					reddit.comment(comment.fullName, std::move(reply));
+					//reddit.comment(comment.fullName, std::move(reply));
 					spdlog::info("Reply sent");
 				} else {
 					spdlog::info("Reply canceled");

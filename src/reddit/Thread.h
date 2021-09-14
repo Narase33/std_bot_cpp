@@ -10,16 +10,16 @@
 
 #include "ResponseBase.h"
 
-#include "../../libs/json.hpp"
+#include "libs/json.hpp"
 using Json = nlohmann::json;
 
 class Thread: public ResponseBase {
 	public:
 		Thread(const Json& json) {
-			id = json["id"].get<String>();
-			selftext = replaceHtmlSymbols(json["selftext"].get<String>());
-			title = replaceHtmlSymbols(json["title"].get<String>());
-			link = "https://www.reddit.com" + json["permalink"].get<String>();
+			id = json["id"].get<std::string>();
+			selftext = replaceHtmlSymbols(json["selftext"].get<std::string>());
+			title = replaceHtmlSymbols(json["title"].get<std::string>());
+			link = "https://www.reddit.com" + json["permalink"].get<std::string>();
 		}
 
 		static bool isThreadJson(const Json& json) {
@@ -30,12 +30,12 @@ class Thread: public ResponseBase {
 			return extractTokensFromLine(selftext + title);
 		}
 
-		std::set<String> extractLinks() const {
+		std::set<std::string> extractLinks() const {
 			return extractLinksFromLine(selftext + title);
 		}
 
-		String toString() const {
-			return String("\n").concat(
+		std::string toString() const {
+			return str_tools::concat("\n",
 					attribute("id", id),
 					attribute("title", title),
 					attribute("link", link),
@@ -46,10 +46,10 @@ class Thread: public ResponseBase {
 			return o << t.toString();
 		}
 
-		String id;
-		String selftext;
-		String title;
-		String link;
+		std::string id;
+		std::string selftext;
+		std::string title;
+		std::string link;
 };
 
 #endif /* SRC_THREAD_H_ */

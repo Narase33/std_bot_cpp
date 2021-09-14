@@ -16,7 +16,7 @@ class Cache {
 	public:
 		struct Entry {
 				T data;
-				std::chrono::steady_clock::time_point expiration;
+				Clock::time_point expiration;
 		};
 
 		Cache(std::chrono::seconds time) :
@@ -45,7 +45,7 @@ class Cache {
 
 		T* add(T data) {
 			freeInvalidComments();
-			entries.push_back( { std::move(data), std::chrono::steady_clock::now() + validityTime });
+			entries.push_back( { std::move(data), Clock::now() + validityTime });
 			return &entries.back().data;
 		}
 
@@ -56,10 +56,11 @@ class Cache {
 		}
 
 		void freeInvalidComments() {
-			const auto pos = std::remove_if(entries.begin(), entries.end(), [](const Entry& c) {
-				return c.expiration < std::chrono::steady_clock::now();
+			const auto posToFirstUnexpired = std::find_if(entries.begin(), entries.end(), [](const Entry& c) {
+				return c.expiration > Clock::now();
 			});
-			entries.erase(pos, entries.end());
+
+			entries.erase(entries.begin(), posToFirstUnexpired);
 		}
 
 		T* find(std::function<bool(const T& t)> func) {

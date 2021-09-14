@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 project (StdBot)
 
@@ -39,5 +39,5 @@ target_compile_options(StdBot PRIVATE
 )
 
 target_include_directories(StdBot PUBLIC
-	${CMAKE_SOURCE_DIR}/libs
+	${CMAKE_SOURCE_DIR}/libs ${CMAKE_SOURCE_DIR} 
 )

@@ -1242,7 +1242,7 @@ namespace std {
 	template<>
 	struct hash<String> {
 			size_t operator()(const String& str) const {
-				return hash()(str.str());
+				return hash<std::string>()(str.str());
 			}
 	};
 }

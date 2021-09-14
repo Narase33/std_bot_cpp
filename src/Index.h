@@ -20,13 +20,13 @@ class Index {
 		Index(const Thread& thread, const std::vector<Comment>& comments) {
 			spdlog::info("indexing new thread id {}", thread.id);
 
-			std::set<String> linksfromThread = thread.extractLinks();
-			spdlog::info("links: {}", String("\n").join(linksfromThread));
+			std::set<std::string> linksfromThread = thread.extractLinks();
+			spdlog::info("links: {}", str_tools::join("\n", linksfromThread));
 			links.insert(std::make_move_iterator(linksfromThread.begin()),
 					std::make_move_iterator(linksfromThread.end()));
 
 			std::set<Token> tokensfromThread = thread.extractTokens();
-			spdlog::info("tokens: {}", String("\n").join(tokensfromThread));
+			spdlog::info("tokens: {}", str_tools::join("\n", tokensfromThread));
 			opTokens.insert(std::make_move_iterator(tokensfromThread.begin()),
 					std::make_move_iterator(tokensfromThread.end()));
 
@@ -40,37 +40,36 @@ class Index {
 		void addToIndex(const Comment& newComment) {
 			spdlog::info("indexing comment id {}", newComment.id);
 
-			std::set<String> foundLinksInComment = newComment.extractLinks();
-			spdlog::info("links in comment: {}", String("\n").join(foundLinksInComment));
+			std::set<std::string> foundLinksInComment = newComment.extractLinks();
+			spdlog::info("links in comment: {}", str_tools::join("n", foundLinksInComment));
 
 			links.insert(std::make_move_iterator(foundLinksInComment.begin()),
 					std::make_move_iterator(foundLinksInComment.end()));
 		}
 
-		void addToIndex(const LinkedToken& linkedToken) {
-			links.insert(linkedToken.link);
-			opTokens.insert(linkedToken.token);
+		bool addToIndex(const LinkedToken& linkedToken) {
+			return links.insert(linkedToken.link).second | opTokens.insert(linkedToken.token).second;
 		}
 
 		bool inIndex(const LinkedToken& linkedToken) const {
 			return tokenInIndex(linkedToken.token) or linkInIndex(linkedToken.link);
 		}
 
-		bool linkInIndex(const String& link) const {
-			return links.find(link) != links.end();
+		bool linkInIndex(const std::string& link) const {
+			return links.contains(link);
 		}
 
 		bool tokenInIndex(const Token& token) const {
-			return opTokens.find(token) != opTokens.end();
+			return opTokens.contains(token);
 		}
 
-		const String& getThreadId() const {
+		const std::string& getThreadId() const {
 			return threadId;
 		}
 	private:
 		std::set<Token> opTokens;
-		std::set<String> links;
-		String threadId;
+		std::set<std::string> links;
+		std::string threadId;
 };
 
 #endif /* SRC_INDEX_H_ */
