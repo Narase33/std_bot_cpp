@@ -8,8 +8,6 @@
 #ifndef SRC_TOKEN_H_
 #define SRC_TOKEN_H_
 
-#include <compare>
-
 #include "Tools.h"
 
 struct Token {
