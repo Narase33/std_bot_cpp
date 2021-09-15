@@ -139,10 +139,10 @@ void debugComment(const char* fullName) {
 	lookForBotCommands(comment);
 
 	const std::set<Token> tokens = comment.extractTokens();
-	spdlog::info("tokens in comment: {}", str_tools::join("\n", tokens));
+	spdlog::info("tokens in comment: {}", str::join("\n", tokens));
 
 	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-	spdlog::info("linked tokens: {}", str_tools::join("\n", linkedTokens));
+	spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
 	if (!addLinkedTokens(linkedTokens, comment.threadId)) {
 		spdlog::info("No tokens to link");
@@ -217,10 +217,10 @@ int main() {
 				lookForBotCommands(comment);
 
 				const std::set<Token> tokens = comment.extractTokens();
-				spdlog::info("tokens in comment: {}", str_tools::join("\n", tokens));
+				spdlog::info("tokens in comment: {}", str::join("\n", tokens));
 
 				const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-				spdlog::info("linked tokens: {}", str_tools::join("\n", linkedTokens));
+				spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
 				if (!addLinkedTokens(linkedTokens, comment.threadId)) {
 					spdlog::info("No tokens to link");
@@ -232,7 +232,7 @@ int main() {
 				spdlog::info("Possible reply:\n{}", reply);
 
 				if (isReplyAllowed(comment)) {
-					//reddit.comment(comment.fullName, std::move(reply));
+					reddit.comment(comment.fullName, std::move(reply));
 					spdlog::info("Reply sent");
 				} else {
 					spdlog::info("Reply canceled");

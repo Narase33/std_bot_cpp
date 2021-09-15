@@ -21,7 +21,7 @@ class SymbolIndexSearch: public SearchBase {
 				return "";
 			}
 
-			const std::vector<std::string_view> subtokens = str_tools::split(token.content, "::");
+			const std::vector<std::string_view> subtokens = str::split(token.content, "::");
 
 			httplib::Result result = tokenClient.Get("/w/cpp/symbol_index");
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);

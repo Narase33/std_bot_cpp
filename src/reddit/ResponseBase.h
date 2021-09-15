@@ -75,20 +75,25 @@ class ResponseBase {
 
 			size_t tokenBegin = line.find(tokenStartString);
 			while (tokenBegin != std::string::npos) {
+				if ((tokenBegin > 0) and canBePartOfIdentifier(line[tokenBegin - 1])) {
+					tokenBegin = line.find(tokenStartString, tokenBegin + tokenStartString.length());
+					continue;
+				}
+
 				const size_t tokenEnd = line.find(tokenEndString, tokenBegin + tokenStartString.length());
 				if (tokenEnd == std::string::npos) {
 					break;
 				}
+				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin + tokenEndString.length())));
 
-				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin)));
-				tokenBegin = line.find(tokenStartString, tokenEnd);
+				tokenBegin = line.find(tokenStartString, tokenEnd + tokenEndString.length());
 			}
 
 			return tokens;
 		}
 
 		std::set<Token> extractTokensFromLine(std::string line) const { // TODO needs some love
-			str_tools::replace_all(line, "\\_", "_");
+			str::replace_all(line, "\\_", "_");
 
 			std::set<Token> tokens;
 

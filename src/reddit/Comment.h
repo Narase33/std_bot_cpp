@@ -27,7 +27,7 @@ class Comment: public ResponseBase {
 
 			const std::string parentId_entry = json["parent_id"].get<std::string>();
 			parentId = parentId_entry.substr(3); // t1_[...], t3_[...]
-			isTopLevelComment = parentId_entry.starts_with("t3_");
+			isTopLevelComment = str::starts_with(parentId_entry, "t3_");
 
 			const std::string threadId_entry = json["link_id"].get<std::string>();
 			threadId = threadId_entry.substr(3); // t3_[...]
@@ -38,8 +38,8 @@ class Comment: public ResponseBase {
 		}
 
 		bool contains(std::string_view substr) const {
-			for (const std::string_view& line : str_tools::split(body, "\n")) {
-				if (line.starts_with(">") or line.starts_with("    ") or line.starts_with("\t")) {
+			for (const std::string_view& line : str::split(body, "\n")) {
+				if (str::starts_with(line, ">") or str::starts_with(line, "    ") or str::starts_with(line, "\t")) {
 					continue;
 				}
 
@@ -52,8 +52,8 @@ class Comment: public ResponseBase {
 
 		std::set<Token> extractTokens() const {
 			std::set<Token> tokens;
-			for (const std::string_view& line : str_tools::split(body, "\n")) {
-				if (line.starts_with('>') or line.starts_with("    ") or line.starts_with("\t")) {
+			for (const std::string_view& line : str::split(body, "\n")) {
+				if (str::starts_with(line, ">") or str::starts_with(line, "    ") or str::starts_with(line, "\t")) {
 					continue;
 				}
 
@@ -68,7 +68,7 @@ class Comment: public ResponseBase {
 		}
 
 		std::string toString() const {
-			return str_tools::concat("\n",
+			return str::concat("\n",
 					attribute("author", author),
 					attribute("isTopLevelComment", isTopLevelComment),
 					attribute("id", id),

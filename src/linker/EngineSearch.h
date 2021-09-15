@@ -22,7 +22,7 @@ class EngineSearch: public SearchBase {
 			}
 
 			std::string tokenName = token.content;
-			str_tools::replace_all(tokenName, "::", "%3A%3A");
+			str::replace_all(tokenName, "::", "%3A%3A");
 
 			const std::string url = "/mwiki/index.php?title=Special%3ASearch&search=" + tokenName;
 			httplib::Result result = tokenClient.Get(url.c_str());

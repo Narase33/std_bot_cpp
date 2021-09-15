@@ -17,11 +17,11 @@ struct Token {
 
 		Token(std::string _content) :
 				content(std::move(_content)) {
-			str_tools::replace_all(content, "%3A", ":");
+			str::replace_all(content, "%3A", ":");
 
-			if (content.starts_with("std::")) {
+			if (str::starts_with(content, "std::")) {
 				type = Type::std;
-			} else if (content.starts_with("<")) {
+			} else if (str::starts_with(content, "<")) {
 				type = Type::header;
 			} else {
 				throw std::runtime_error("unknown token");

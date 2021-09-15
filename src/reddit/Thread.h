@@ -35,7 +35,7 @@ class Thread: public ResponseBase {
 		}
 
 		std::string toString() const {
-			return str_tools::concat("\n",
+			return str::concat("\n",
 					attribute("id", id),
 					attribute("title", title),
 					attribute("link", link),

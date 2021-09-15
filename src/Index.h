@@ -21,12 +21,12 @@ class Index {
 			spdlog::info("indexing new thread id {}", thread.id);
 
 			std::set<std::string> linksfromThread = thread.extractLinks();
-			spdlog::info("links: {}", str_tools::join("\n", linksfromThread));
+			spdlog::info("links: {}", str::join("\n", linksfromThread));
 			links.insert(std::make_move_iterator(linksfromThread.begin()),
 					std::make_move_iterator(linksfromThread.end()));
 
 			std::set<Token> tokensfromThread = thread.extractTokens();
-			spdlog::info("tokens: {}", str_tools::join("\n", tokensfromThread));
+			spdlog::info("tokens: {}", str::join("\n", tokensfromThread));
 			opTokens.insert(std::make_move_iterator(tokensfromThread.begin()),
 					std::make_move_iterator(tokensfromThread.end()));
 
@@ -41,7 +41,7 @@ class Index {
 			spdlog::info("indexing comment id {}", newComment.id);
 
 			std::set<std::string> foundLinksInComment = newComment.extractLinks();
-			spdlog::info("links in comment: {}", str_tools::join("n", foundLinksInComment));
+			spdlog::info("links in comment: {}", str::join("n", foundLinksInComment));
 
 			links.insert(std::make_move_iterator(foundLinksInComment.begin()),
 					std::make_move_iterator(foundLinksInComment.end()));
@@ -56,11 +56,11 @@ class Index {
 		}
 
 		bool linkInIndex(const std::string& link) const {
-			return links.contains(link);
+			return links.find(link) != links.end();
 		}
 
 		bool tokenInIndex(const Token& token) const {
-			return opTokens.contains(token);
+			return opTokens.find(token) != opTokens.end();
 		}
 
 		const std::string& getThreadId() const {

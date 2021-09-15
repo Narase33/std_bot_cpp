@@ -20,7 +20,7 @@
 using namespace std::string_literals;
 using Clock = std::chrono::system_clock;
 
-namespace str_tools {
+namespace str {
 	template<typename Arg>
 	void _concat(std::ostringstream& stream, std::string_view delimiter, Arg&& arg) {
 		stream << delimiter << arg;
@@ -85,12 +85,29 @@ namespace str_tools {
 			pos = str.find(find, pos + replacement.length());
 		}
 	}
+
+	bool starts_with(std::string_view str, std::string_view content) {
+		if (str.length() < content.length()) {
+			return false;
+		}
+
+		if (str.empty()) {
+			return content.empty();
+		}
+
+		for (size_t i = 0; i < content.length(); i++) {
+			if (content[i] != str[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 template<typename T1, typename ... T2>
 void check(bool condition, T1&& t1, T2&& ... t2) {
 	if (!condition) {
-		throw std::runtime_error(str_tools::concat("", "", std::forward<T1>(t1), std::forward<T2>(t2)...));
+		throw std::runtime_error(str::concat("", "", std::forward<T1>(t1), std::forward<T2>(t2)...));
 	}
 }
 
@@ -119,13 +136,17 @@ std::pair<std::string_view, size_t> snip_between(std::string_view source, const 
 }
 
 std::string replaceHtmlSymbols(std::string str) {
-	str_tools::replace_all(str, "&amp;", "&");
-	str_tools::replace_all(str, "&quot;", "\"");
-	str_tools::replace_all(str, "&apos;", "'");
-	str_tools::replace_all(str, "&gt;", ">");
-	str_tools::replace_all(str, "&lt;", "<");
-	str_tools::replace_all(str, "&#x200B;", "\"");
+	str::replace_all(str, "&amp;", "&");
+	str::replace_all(str, "&quot;", "\"");
+	str::replace_all(str, "&apos;", "'");
+	str::replace_all(str, "&gt;", ">");
+	str::replace_all(str, "&lt;", "<");
+	str::replace_all(str, "&#x200B;", "\"");
 	return str;
+}
+
+bool canBePartOfIdentifier(char c) { // TODO Name?
+	return std::isalnum(c) or (c == '_');
 }
 
 #endif /* SRC_TOOLS_H_ */
