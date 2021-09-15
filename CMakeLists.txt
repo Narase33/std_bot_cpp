@@ -8,7 +8,7 @@ find_package(Threads REQUIRED)
 
 link_directories(/usr/local/lib/ ${CMAKE_SOURCE_DIR}/libs/spdlog)
 
-add_executable(StdBot src/StdBot.cpp libs/String.cpp)
+add_executable(StdBot src/StdBot.cpp)
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -41,3 +41,5 @@ target_compile_options(StdBot PRIVATE
 target_include_directories(StdBot PUBLIC
 	${CMAKE_SOURCE_DIR}/libs ${CMAKE_SOURCE_DIR} 
 )
+
+target_precompile_headers(StdBot PRIVATE ${CMAKE_SOURCE_DIR}/libs/httplib.h ${CMAKE_SOURCE_DIR}/libs/json.hpp)
