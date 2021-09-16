@@ -39,7 +39,7 @@ class Comment: public ResponseBase {
 
 		bool contains(std::string_view substr) const {
 			for (const std::string_view& line : str::split(body, "\n")) {
-				if (str::starts_with(line, ">") or str::starts_with(line, "    ") or str::starts_with(line, "\t")) {
+				if (line.empty() or str::starts_with(line, ">") or str::starts_with(line, "    ") or str::starts_with(line, "\t")) {
 					continue;
 				}
 

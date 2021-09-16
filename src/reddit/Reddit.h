@@ -12,9 +12,7 @@
 #include <iomanip>
 #include <ctime>
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "libs/httplib.h"
-#undef CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include "Comment.h"
 #include "Thread.h"

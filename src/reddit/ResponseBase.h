@@ -68,25 +68,34 @@ class ResponseBase {
 		}
 
 		std::set<Token> extractHeaderTokensFromLine(const std::string& line) const { // TODO needs some love
-			const std::string_view tokenStartString = "<";
-			const std::string_view tokenEndString = ">";
+			const char tokenStartChar = '<';
+			const char tokenEndChar = '>';
 
 			std::set<Token> tokens;
 
-			size_t tokenBegin = line.find(tokenStartString);
+			size_t tokenBegin = line.find(tokenStartChar);
 			while (tokenBegin != std::string::npos) {
 				if ((tokenBegin > 0) and canBePartOfIdentifier(line[tokenBegin - 1])) {
-					tokenBegin = line.find(tokenStartString, tokenBegin + tokenStartString.length());
+					tokenBegin = line.find(tokenStartChar, tokenBegin + 1);
 					continue;
 				}
 
-				const size_t tokenEnd = line.find(tokenEndString, tokenBegin + tokenStartString.length());
-				if (tokenEnd == std::string::npos) {
+				size_t tokenEnd = tokenBegin + 1;
+				while ((tokenEnd < line.length()) and canBePartOfIdentifier(line[tokenEnd])) {
+					tokenEnd++;
+				}
+
+				if (tokenEnd == line.length()) {
 					break;
 				}
-				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin + tokenEndString.length())));
 
-				tokenBegin = line.find(tokenStartString, tokenEnd + tokenEndString.length());
+				if (line[tokenEnd] != tokenEndChar) {
+					tokenBegin = line.find(tokenStartChar, tokenEnd);
+					continue;
+				}
+
+				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin + 1)));
+				tokenBegin = line.find(tokenStartChar, tokenEnd + 1);
 			}
 
 			return tokens;

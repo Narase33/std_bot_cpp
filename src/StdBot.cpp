@@ -197,7 +197,7 @@ int main() {
 	std::signal(SIGSEGV, signalHandler);
 	std::signal(SIGKILL, signalHandler);
 
-	// simpleTests();
+	simpleTests();
 	debugComment("t1_hczqyj2");
 
 	loadData();
