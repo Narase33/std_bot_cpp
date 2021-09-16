@@ -11,6 +11,10 @@ Reddit reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
 std::set<std::string> ignoredUsers;
 
+volatile std::sig_atomic_t receivedSignal = 0;
+std::mutex signalMutex;
+std::thread signalThread;
+
 const std::string signature = "\n\n---\n\n^(Last update: 14.09.21. Last Change: Can now link headers like '<bitset>')[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const std::string& threadId) {
@@ -111,22 +115,23 @@ void lookForBotCommands(const Comment& comment) {
 }
 
 void signalHandler(int signal) {
-	std::string signalName;
-	switch (signal) {
-		case SIGABRT:
-			signalName = "SIGABRT";
-			break;
-		case SIGSEGV:
-			signalName = "SIGSEGV";
-			break;
-		case SIGKILL:
-			signalName = "SIGKILL";
-			break;
-		default:
-			signalName = "unknown";
+	receivedSignal = signal;
+	signalMutex.unlock();
+}
+
+void setupSignalHandler() {
+	signalMutex.lock();
+
+	for (auto sig : { SIGABRT, SIGFPE, SIGKILL, SIGINT, SIGSEGV, SIGTERM }) {
+		std::signal(sig, signalHandler);
 	}
 
-	spdlog::critical("Received signal: {}", signalName);
+	signalThread = std::thread([&]() {
+		std::unique_lock<std::mutex> lock(signalMutex);
+		spdlog::critical("Received signal: {}", receivedSignal);
+		spdlog::shutdown();
+		std::exit(-1);
+	});
 }
 
 void debugComment(const char* fullName) {
@@ -192,10 +197,7 @@ void simpleTests() {
 
 int main() {
 	configureLogger();
-
-	std::signal(SIGABRT, signalHandler);
-	std::signal(SIGSEGV, signalHandler);
-	std::signal(SIGKILL, signalHandler);
+	setupSignalHandler();
 
 	// simpleTests();
 	// debugComment("t1_hczqyj2");

@@ -28,6 +28,10 @@ class Reddit {
 	public:
 		Reddit() {
 			tokenClient.set_basic_auth(bot_id, bot_secret);
+
+			for (Comment& comment : requestComments()) {
+				commentCache.add(std::move(comment.id));
+			}
 		}
 
 		Comment requestComment(const std::string& fullName) {
@@ -42,9 +46,11 @@ class Reddit {
 			httplib::Params params;
 			params.emplace("id", fullName);
 
+			waitForRateLimit();
 			const httplib::Result result = apiClient.Get("/api/info", params, headers);
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
+			check_rateLimit(result);
 
 			const Json jsonResult = Json::parse(result->body);
 			return extractComments(jsonResult["data"]["children"]).front();
@@ -57,12 +63,9 @@ class Reddit {
 
 		std::vector<Comment> requestNewComments() {
 			std::vector<Comment> allComments = requestComments();
-			const Clock::time_point validCommentTimestamp = std::exchange(lastCommentRequest, Clock::now());
 
 			const auto pos = std::partition(allComments.begin(), allComments.end(), [&](const Comment& c) {
-				return ((validCommentTimestamp - Clock::time_point(std::chrono::seconds(c.created))) < 20s)
-						and (c.author != "std_bot")
-						and !commentCache.isKnown(c.id);
+				return (c.author != "std_bot") and !commentCache.isKnown(c.id);
 			});
 
 			std::vector<Comment> filteredComments;
@@ -97,17 +100,11 @@ class Reddit {
 			params.emplace("parent", parentFullName);
 			params.emplace("text", payload);
 
+			waitForRateLimit();
 			const httplib::Result result = apiClient.Post("/api/comment", headers, params);
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
-
-			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) { // TODO Needs some delay
-				std::cerr << "Warning! Ratelimit critical!" << std::endl;
-				printHeader("X-Ratelimit-Used", result);
-				printHeader("X-Ratelimit-Remaining", result);
-				printHeader("X-Ratelimit-Reset", result);
-				throw;
-			}
+			check_rateLimit(result);
 
 			return Json::parse(result->body);
 		}
@@ -115,11 +112,28 @@ class Reddit {
 	private:
 		std::string accessToken;
 		Clock::time_point accessTokenExpiration = Clock::time_point::min();
-		Clock::time_point lastCommentRequest = Clock::now();
+		Clock::time_point nextAccessTime = Clock::time_point::min();
 
-		Cache<std::string> commentCache { std::chrono::minutes(1) };
+		Cache<std::string> commentCache { std::chrono::hours(24) };
 		httplib::Client apiClient { "https://oauth.reddit.com" };
 		httplib::Client tokenClient { "https://www.reddit.com" };
+
+		void check_rateLimit(const httplib::Result& result) const {
+			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) {
+				printHeader("X-Ratelimit-Used", result);
+				printHeader("X-Ratelimit-Remaining", result);
+				printHeader("X-Ratelimit-Reset", result);
+
+				const std::string resetTime = result->get_header_value("X-Ratelimit-Reset");
+				nextAccessTime = Clock::now() + std::chrono::seconds(std::stoi(resetTime));
+			}
+		}
+
+		void waitForRateLimit() const {
+			if (Clock::now() < nextAccessTime) {
+				std::this_thread::sleep_until(nextAccessTime);
+			}
+		}
 
 		std::vector<Comment> extractComments(const Json& dataArray) const {
 			std::vector<Comment> comments;
@@ -169,23 +183,27 @@ class Reddit {
 			headers.emplace("Content-Type", "application/json");
 			headers.emplace("Authorization", "bearer " + accessToken);
 
+			waitForRateLimit();
 			const httplib::Result result = apiClient.Get(address.c_str(), headers);
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check(result->status == 200, result->reason);
-
-			if (std::stoi(result->get_header_value("X-Ratelimit-Remaining")) < 10) {
-				std::cerr << "Warning! Ratelimit critical!" << std::endl;
-				printHeader("X-Ratelimit-Used", result);
-				printHeader("X-Ratelimit-Remaining", result);
-				printHeader("X-Ratelimit-Reset", result);
-				throw;
-			}
+			check_rateLimit(result);
 
 			return Json::parse(result->body);
 		}
 
-		void printHeader(const char* name, const httplib::Result& result) {
-			std::cout << name << ": " << result->get_header_value(name) << std::endl;
+		Json accessApiClient(std::function<httplib::Result(httplib::Client& client)> func) {
+			waitForRateLimit();
+			const httplib::Result result = func(apiClient);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
+			check(result->status == 200, result->reason);
+			check_rateLimit(result);
+
+			return Json::parse(result->body);
+		}
+
+		void printHeader(const char* name, const httplib::Result& result) const {
+			spdlog::warn("{}: {}", name, result->get_header_value(name));
 		}
 
 		friend int main();
