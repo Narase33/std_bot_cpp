@@ -60,7 +60,11 @@ class ResponseBase {
 					}
 				}
 
-				tokens.insert(Token(line.substr(tokenBegin, tokenEnd - tokenBegin)));
+				std::string tokenValue = line.substr(tokenBegin, tokenEnd - tokenBegin); // TODO better
+				if (tokenValue.back() != ':') {
+					tokens.insert(Token(std::move(tokenValue)));
+				}
+
 				tokenBegin = line.find(tokenStartString, tokenEnd);
 			}
 
