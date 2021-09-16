@@ -30,12 +30,12 @@ Index* getIndex(const std::string& threadId) {
 bool addLinkedTokens(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
 	Index* index = getIndex(threadId);
 
-	bool allLinkedTokensKnown = true;
+	bool newTokenLinks = false;
 	for (const LinkedToken& linkedToken : linkedTokens) {
-		allLinkedTokensKnown &= index->addToIndex(linkedToken);
+		newTokenLinks |= index->addToIndex(linkedToken);
 	}
 
-	return !allLinkedTokensKnown;
+	return newTokenLinks;
 }
 
 std::string replyMessage(const std::set<LinkedToken>& linkedTokens) {
@@ -154,8 +154,8 @@ void debugComment(const char* fullName) {
 	spdlog::info("Possible reply:\n{}", reply);
 
 	if (isReplyAllowed(comment)) {
-		reddit.comment(comment.fullName, std::move(reply));
-		// spdlog::info("Reply sent");
+		// reddit.comment(comment.fullName, std::move(reply));
+		spdlog::info("Reply sent");
 	} else {
 		spdlog::info("Reply canceled");
 	}
@@ -197,8 +197,8 @@ int main() {
 	std::signal(SIGSEGV, signalHandler);
 	std::signal(SIGKILL, signalHandler);
 
-	// debugComment("t1_hcf8ycv");
 	// simpleTests();
+	debugComment("t1_hczqyj2");
 
 	loadData();
 

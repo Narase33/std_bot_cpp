@@ -42,4 +42,4 @@ target_include_directories(StdBot PUBLIC
 	${CMAKE_SOURCE_DIR}/libs ${CMAKE_SOURCE_DIR} 
 )
 
-target_precompile_headers(StdBot PRIVATE ${CMAKE_SOURCE_DIR}/libs/httplib.h ${CMAKE_SOURCE_DIR}/libs/json.hpp)
+# target_precompile_headers(StdBot PRIVATE ${CMAKE_SOURCE_DIR}/libs/httplib.h ${CMAKE_SOURCE_DIR}/libs/json.hpp)
