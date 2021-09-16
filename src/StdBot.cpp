@@ -87,14 +87,21 @@ void saveData() {
 }
 
 bool isReplyAllowed(const Comment& comment) {
-	bool replyAllowed = comment.isTopLevelComment;
+	bool replyAllowed = true;
+
+	if (!comment.isTopLevelComment) {
+		replyAllowed = false;
+		spdlog::info("Comment not top level");
+	}
 
 	if (ignoredUsers.find(comment.author) != ignoredUsers.end()) {
 		replyAllowed = false;
+		spdlog::info("Author in ignore list");
 	}
 
 	if (comment.contains("!std") and !(comment.contains("!std ignore_me") or comment.contains("!std follow_me"))) {
 		replyAllowed = true;
+		spdlog::info("Forced comment");
 	}
 
 	return replyAllowed;
@@ -226,7 +233,7 @@ int main() {
 
 				if (!addLinkedTokens(linkedTokens, comment.threadId)) {
 					spdlog::info("No tokens to link");
-					spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+					spdlog::info("{}\n\n\n\n\n", std::string(80, '='));
 					continue;
 				}
 
@@ -243,9 +250,9 @@ int main() {
 				spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 			}
 		} catch (std::exception& e) {
-			spdlog::error(e.what());
+			spdlog::error("{}\n", e.what());
 		} catch (...) {
-			spdlog::error("Catched unknown error!");
+			spdlog::critical("Catched unknown error!\n");
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	}
