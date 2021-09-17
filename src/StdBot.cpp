@@ -207,7 +207,7 @@ int main() {
 	setupSignalHandler();
 
 	// simpleTests();
-	// debugComment("t1_hczqyj2");
+	debugComment("t1_hd683pv");
 
 	loadData();
 

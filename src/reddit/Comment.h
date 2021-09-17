@@ -20,6 +20,8 @@ class Comment: public ResponseBase {
 		Comment(const Json& json) {
 			id = json["id"].get<std::string>();
 			body = replaceHtmlSymbols(json["body"].get<std::string>());
+			str::replace_all(body, "\\_", "_");
+
 			author = json["author"].get<std::string>();
 			created = json["created"].get<size_t>();
 			fullName = json["name"].get<std::string>();
