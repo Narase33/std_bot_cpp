@@ -17,10 +17,11 @@ class SearchBase {
 
 	protected:
 		bool isSubtoken(std::string_view str, std::string_view subtoken) const {
-			if ((subtoken.length() == str.length()) or (subtoken.length() == (str.length() + 2) /* templates end with '<>' */)) {
-				return str::starts_with(str, subtoken);
+			if (str::ends_with(str, "<>")) {
+				str.remove_suffix(2);
 			}
-			return false;
+
+			return str == subtoken;
 		}
 
 		std::optional<std::string_view> findLinkToSubtoken(const std::string& htmlPage, std::string_view subtoken, const std::string& capsulationBegin, const std::string& capsulationEnd) const {

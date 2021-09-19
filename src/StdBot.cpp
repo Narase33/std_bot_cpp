@@ -147,7 +147,7 @@ void debugComment(const char* fullName) {
 	const Comment comment = reddit.requestComment(fullName);
 	std::cout << comment << std::endl;
 
-	getIndex(comment.threadId)->addToIndex(comment);
+	// getIndex(comment.threadId)->addToIndex(comment);
 	lookForBotCommands(comment);
 
 	const std::set<Token> tokens = comment.extractTokens();
@@ -206,8 +206,8 @@ int main() {
 	configureLogger();
 	setupSignalHandler();
 
-	// simpleTests();
-	debugComment("t1_hd683pv");
+	simpleTests();
+	debugComment("t1_hdg7ykk");
 
 	loadData();
 

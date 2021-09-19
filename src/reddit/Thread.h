@@ -17,8 +17,13 @@ class Thread: public ResponseBase {
 	public:
 		Thread(const Json& json) {
 			id = json["id"].get<std::string>();
+
 			selftext = replaceHtmlSymbols(json["selftext"].get<std::string>());
+			str::replace_all(selftext, "\\_", "_");
+
 			title = replaceHtmlSymbols(json["title"].get<std::string>());
+			str::replace_all(title, "\\_", "_");
+
 			link = "https://www.reddit.com" + json["permalink"].get<std::string>();
 		}
 

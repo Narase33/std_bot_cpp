@@ -102,6 +102,23 @@ namespace str {
 		}
 		return true;
 	}
+
+	bool ends_with(std::string_view str, std::string_view content) {
+		if (str.length() < content.length()) {
+			return false;
+		}
+
+		if (str.empty()) {
+			return content.empty();
+		}
+
+		for (auto str_it = str.rbegin(), content_it = content.rbegin(); content_it != content.rend(); str_it++, content_it++) {
+			if (*str_it != *content_it) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 template<typename T1, typename ... T2>

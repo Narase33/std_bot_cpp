@@ -36,6 +36,12 @@ class EngineSearch: public SearchBase {
 				result = tokenClient.Get(redirectUrl.c_str());
 				check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 				check(result->status == 200, result->reason);
+
+				const std::string_view title = snip_between(result->body, "<title>", "</title>").first;
+				if (title != (token.content + " - cppreference.com")) {
+					return "";
+				}
+
 				return url;
 			}
 
