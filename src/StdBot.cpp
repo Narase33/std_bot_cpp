@@ -217,8 +217,9 @@ int main() {
 
 			for (const Comment& comment : comments) {
 				spdlog::info("new comment:\n{}", comment.toString());
+				Index* index = getIndex(comment.threadId);
 
-				getIndex(comment.threadId)->addToIndex(comment);
+				index->addToIndex(comment);
 				lookForBotCommands(comment);
 
 				const std::set<Token> tokens = comment.extractTokens();
@@ -240,7 +241,6 @@ int main() {
 					reddit.comment(comment.fullName, std::move(reply));
 					spdlog::info("Reply sent");
 
-					Index* index = getIndex(comment.threadId);
 					for (const LinkedToken& t : linkedTokens) {
 						index->addToIndex(t);
 					}
