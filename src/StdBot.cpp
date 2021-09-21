@@ -223,6 +223,11 @@ int main() {
 				lookForBotCommands(comment);
 
 				const std::set<Token> tokens = comment.extractTokens();
+				if (tokens.size() == 0) {
+					spdlog::info("no tokens in comment");
+					continue;
+				}
+
 				spdlog::info("tokens in comment: {}", str::join("\n", tokens));
 
 				const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
