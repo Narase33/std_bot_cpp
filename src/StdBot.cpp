@@ -31,15 +31,11 @@ Index* getIndex(const std::string& threadId) {
 	return index;
 }
 
-bool addLinkedTokens(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
+bool allLinksKnown(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
 	Index* index = getIndex(threadId);
-
-	bool newTokenLinks = false;
-	for (const LinkedToken& linkedToken : linkedTokens) {
-		newTokenLinks |= index->addToIndex(linkedToken);
-	}
-
-	return newTokenLinks;
+	return std::all_of(linkedTokens.begin(), linkedTokens.end(), [&](const LinkedToken& t) {
+		return index->inIndex(t);
+	});
 }
 
 std::string replyMessage(const std::set<LinkedToken>& linkedTokens) {
@@ -156,7 +152,7 @@ void debugComment(const char* fullName) {
 	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
 	spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
-	if (!addLinkedTokens(linkedTokens, comment.threadId)) {
+	if (!allLinksKnown(linkedTokens, comment.threadId)) {
 		spdlog::info("No tokens to link");
 		spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 		return;
@@ -231,7 +227,7 @@ int main() {
 				const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
 				spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
-				if (!addLinkedTokens(linkedTokens, comment.threadId)) {
+				if (!allLinksKnown(linkedTokens, comment.threadId)) {
 					spdlog::info("No tokens to link");
 					spdlog::info("{}\n\n\n\n\n", std::string(80, '='));
 					continue;
@@ -243,6 +239,11 @@ int main() {
 				if (isReplyAllowed(comment)) {
 					reddit.comment(comment.fullName, std::move(reply));
 					spdlog::info("Reply sent");
+
+					Index* index = getIndex(comment.threadId);
+					for (const LinkedToken& t : linkedTokens) {
+						index->addToIndex(t);
+					}
 				} else {
 					spdlog::info("Reply canceled");
 				}
