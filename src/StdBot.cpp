@@ -31,7 +31,7 @@ Index* getIndex(const std::string& threadId) {
 	return index;
 }
 
-bool allLinksKnown(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
+bool allLinksKnownInThread(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
 	Index* index = getIndex(threadId);
 	return std::all_of(linkedTokens.begin(), linkedTokens.end(), [&](const LinkedToken& t) {
 		return index->inIndex(t);
@@ -152,7 +152,7 @@ void debugComment(const char* fullName) {
 	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
 	spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
-	if (!allLinksKnown(linkedTokens, comment.threadId)) {
+	if (!allLinksKnownInThread(linkedTokens, comment.threadId)) {
 		spdlog::info("No tokens to link");
 		spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 		return;
@@ -216,6 +216,8 @@ int main() {
 			const std::vector<Comment> comments = reddit.requestNewComments();
 
 			for (const Comment& comment : comments) {
+				spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+
 				spdlog::info("new comment:\n{}", comment.toString());
 				Index* index = getIndex(comment.threadId);
 
@@ -233,9 +235,8 @@ int main() {
 				const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
 				spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
-				if (!allLinksKnown(linkedTokens, comment.threadId)) {
+				if (allLinksKnownInThread(linkedTokens, comment.threadId)) {
 					spdlog::info("No tokens to link");
-					spdlog::info("{}\n\n\n\n\n", std::string(80, '='));
 					continue;
 				}
 
@@ -252,8 +253,6 @@ int main() {
 				} else {
 					spdlog::info("Reply canceled");
 				}
-
-				spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 			}
 		} catch (std::exception& e) {
 			spdlog::error("{}\n", e.what());
