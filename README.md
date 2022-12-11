@@ -25,7 +25,7 @@ In short terms:
 - If you used some tokens outside of quotes or code blocks, the bot will link them and put them in a list
   - From this list delete every token whose link has already been used somewhere in the same thread
   - Also delete all tokens from this list OP used in their text
-- If there is at least one token left in this list and youre comment it is on top level, the bot will post the full list as a reply
+- If there is at least one token left in this list and your comment it is on top level, the bot will post the full list as a reply
 
 To make this a bit more efficient I use caches for indexed comments and links I already searched online for
 
