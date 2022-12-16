@@ -10,45 +10,69 @@
 
 #include "SearchBase.h"
 
-class SymbolIndexSearch: public SearchBase {
-	public:
-		SymbolIndexSearch(httplib::Client& client) :
-				tokenClient(client) {
+class SymbolIndexSearch : public SearchBase {
+public:
+	SymbolIndexSearch(httplib::Client& client) :
+		tokenClient(client) {
+	}
+
+	std::string operator()(const Token& token) {
+		if (token.type != Token::Type::std) {
+			return "";
 		}
 
-		std::string operator()(const Token& token) {
-			if (token.type != Token::Type::std) {
-				return "";
+		std::vector<std::string_view> subtokens = str::split(token.content, "::");
+		for (std::string_view& v : subtokens) {
+			const size_t start_template = v.find('<');
+			if (start_template != std::string_view::npos) {
+				v.remove_suffix(v.size() - start_template);
 			}
 
-			const std::vector<std::string_view> subtokens = str::split(token.content, "::");
+			const size_t start_parenthesis = v.find('(');
+			if (start_parenthesis != std::string_view::npos) {
+				v.remove_suffix(v.size() - start_parenthesis);
+			}
+		}
 
-			httplib::Result result = tokenClient.Get("/w/cpp/symbol_index");
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
-			check(result->status == 200, result->reason);
+		httplib::Result result = tokenClient.Get("/w/cpp/symbol_index");
+		check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
+		check(result->status == 200, result->reason);
 
-			for (size_t i = 1; i < subtokens.size() - 1; i++) {
-				const std::optional<std::string_view> link = findLinkToSubtoken(result->body, subtokens[i], "<code>", "</code>");
-				if (!link.has_value()) {
-					return "";
-				}
+		for (size_t i = 1; i < subtokens.size(); i++) {
+			std::optional<std::string_view> link;
 
-				const std::string url(link.value());
-				result = tokenClient.Get(url.c_str());
-				check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
-				check(result->status == 200, result->reason);
+			if (!link.has_value()) {
+				link = findLinkToSubtoken(result->body, subtokens[i], "<span>", "</span>");
 			}
 
-			const std::optional<std::string_view> link = findLinkToSubtoken(result->body, subtokens.back(), "<tt>", "</tt>");
+			if (!link.has_value()) {
+				link = findLinkToSubtoken(result->body, subtokens[i], "<code>", "</code>");
+			}
+
+			if (!link.has_value()) {
+				link = findLinkToSubtoken(result->body, subtokens[i], "<tt>", "</tt>");
+			}
+
 			if (!link.has_value()) {
 				return "";
 			}
 
-			return std::string(link.value());
+
+			if (i == subtokens.size() - 1) {
+				return std::string(link.value());
+			}
+
+			const std::string url(link.value());
+			result = tokenClient.Get(url.c_str());
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
+			check(result->status == 200, result->reason);
 		}
 
-	private:
-		httplib::Client& tokenClient;
+		return "";
+	}
+
+private:
+	httplib::Client& tokenClient;
 };
 
 #endif /* SRC_LINKER_SYMBOLINDEXSEARCH_H_ */

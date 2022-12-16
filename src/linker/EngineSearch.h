@@ -27,7 +27,7 @@ class EngineSearch: public SearchBase {
 			const std::string url = "/mwiki/index.php?title=Special%3ASearch&search=" + tokenName;
 			httplib::Result result = tokenClient.Get(url.c_str());
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
-			check(result->status == 200 or result->status == 302, result->reason);
+			check((result->status == 200) or (result->status == 302), result->reason);
 
 			if (result->status == 302) { // direct hit!
 				std::string redirectUrl = result->get_header_value("Location");

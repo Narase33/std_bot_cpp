@@ -8,17 +8,18 @@
 #ifndef SRC_TOOLS_H_
 #define SRC_TOOLS_H_
 
+#include <string>
+#include <vector>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-
-#include <string>
-#include <vector>
 
 #define STD_HERE std::string("File: ") + __FILE__ + ", Func: " + __func__ + ", Line: " + std::to_string(__LINE__)
 
 using namespace std::string_literals;
 using Clock = std::chrono::system_clock;
+using Json = nlohmann::json;
 
 namespace str {
 	template<typename Arg>
@@ -133,11 +134,11 @@ std::pair<std::string_view, size_t> snip(std::string_view source, const std::str
 	if (begin != std::string::npos) {
 		const size_t end = source.find(to, begin + from.length());
 		if (end != std::string::npos) {
-			return {source.substr(begin, end+begin), end};
+			return { source.substr(begin, end + begin), end };
 		}
 	}
 
-	return {"", 0};
+	return { "", 0 };
 }
 
 std::pair<std::string_view, size_t> snip_between(std::string_view source, const std::string& from, const std::string& to, size_t start = 0) {
@@ -145,11 +146,11 @@ std::pair<std::string_view, size_t> snip_between(std::string_view source, const 
 	if (begin != std::string::npos) {
 		const size_t end = source.find(to, begin + from.length());
 		if (end != std::string::npos) {
-			return {source.substr(begin+from.length(), end - (begin+from.length())), end};
+			return { source.substr(begin + from.length(), end - (begin + from.length())), end };
 		}
 	}
 
-	return {"", 0};
+	return { "", 0 };
 }
 
 std::string replaceHtmlSymbols(std::string str) {

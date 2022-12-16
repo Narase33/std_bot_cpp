@@ -10,7 +10,8 @@
 
 #include "ResponseBase.h"
 
-#include "libs/json.hpp"
+#include <nlohmann/json.hpp>
+
 using Json = nlohmann::json;
 
 class Thread: public ResponseBase {

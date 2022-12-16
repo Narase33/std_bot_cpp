@@ -10,8 +10,9 @@
 
 #include <vector>
 #include <string>
-#include "src/Token.h"
+#include <set>
 
+#include "src/Token.h"
 #include "src/Tools.h"
 
 class ResponseBase {

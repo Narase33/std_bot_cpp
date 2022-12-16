@@ -8,7 +8,7 @@
 #ifndef SRC_COMMENT_H_
 #define SRC_COMMENT_H_
 
-#include "libs/json.hpp"
+#include <nlohmann/json.hpp>
 using Json = nlohmann::json;
 
 #include "ResponseBase.h"

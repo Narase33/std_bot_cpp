@@ -1,0 +1,24 @@
+# ninja log v5
+1	13	0	clean	9992afb1f91dc381
+6	934	6929131377559882	libs/spdlog/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.obj	7c7cd0b110c2e531
+1	5103	6928977434707750	CMakeFiles/StdBot.dir/cmake_pch.cxx.obj	bdc44d47fa7dc01
+11	709	6929131375319379	libs/spdlog/CMakeFiles/spdlog.dir/src/file_sinks.cpp.obj	aff6b56af84dd87
+17	788	6929131376109561	libs/spdlog/CMakeFiles/spdlog.dir/src/async.cpp.obj	71e5f5f533211bf4
+20	874	6929131376959746	libs/spdlog/CMakeFiles/spdlog.dir/src/cfg.cpp.obj	cd726a9970d74db2
+24	1063	6929131378850238	libs/spdlog/CMakeFiles/spdlog.dir/src/fmt.cpp.obj	ad183aa13066c0a6
+14	989	6929131378120006	libs/spdlog/CMakeFiles/spdlog.dir/src/color_sinks.cpp.obj	72be1d17292db66a
+1772	1916	6929131386672081	libs/spdlog/spdlogd.lib	f6123d52c52e4e9e
+8	1772	6929131385921921	libs/spdlog/CMakeFiles/spdlog.dir/src/spdlog.cpp.obj	6867da0675c4a845
+2	4177	6929144225896889	CMakeFiles/StdBot.dir/src/StdBot.cpp.obj	3495b084c4952823
+4178	4527	6929144228927564	StdBot.exe	3b8bc483e6d43954
+0	12	0	clean	9992afb1f91dc381
+11	766	6929149688540227	libs/spdlog/CMakeFiles/spdlog.dir/src/file_sinks.cpp.obj	aff6b56af84dd87
+14	831	6929149689190353	libs/spdlog/CMakeFiles/spdlog.dir/src/async.cpp.obj	71e5f5f533211bf4
+20	929	6929149690160576	libs/spdlog/CMakeFiles/spdlog.dir/src/cfg.cpp.obj	cd726a9970d74db2
+17	984	6929149690720695	libs/spdlog/CMakeFiles/spdlog.dir/src/color_sinks.cpp.obj	72be1d17292db66a
+5	989	6929149690770705	libs/spdlog/CMakeFiles/spdlog.dir/src/stdout_sinks.cpp.obj	7c7cd0b110c2e531
+23	1083	6929149691710925	libs/spdlog/CMakeFiles/spdlog.dir/src/fmt.cpp.obj	ad183aa13066c0a6
+8	1817	6929149699017643	libs/spdlog/CMakeFiles/spdlog.dir/src/spdlog.cpp.obj	6867da0675c4a845
+1818	1966	6929149699827825	libs/spdlog/spdlogd.lib	f6123d52c52e4e9e
+2	4171	6929149722524182	CMakeFiles/StdBot.dir/src/StdBot.cpp.obj	3495b084c4952823
+4171	4432	6929149724654652	StdBot.exe	3b8bc483e6d43954

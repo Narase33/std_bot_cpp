@@ -8,8 +8,9 @@
 #ifndef SRC_REDDIT_CLIENT_H_
 #define SRC_REDDIT_CLIENT_H_
 
-#include "libs/httplib.h"
+#include <httplib.h>
 #include "src/Settings.h"
+#include "src/Tools.h"
 
 #include <chrono>
 

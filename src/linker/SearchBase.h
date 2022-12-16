@@ -9,35 +9,66 @@
 #define SRC_LINKER_SEARCHBASE_H_
 
 #include <vector>
+#include <optional>
 
 #include "src/Tools.h"
 #include "src/Token.h"
 
 class SearchBase {
 
-	protected:
-		bool isSubtoken(std::string_view str, std::string_view subtoken) const {
-			if (str::ends_with(str, "<>")) {
-				str.remove_suffix(2);
-			}
-
-			return str == subtoken;
+protected:
+	void removeSuffix(std::string_view& strv, std::string_view suffix) const {
+		if (str::ends_with(strv, suffix)) {
+			strv.remove_suffix(suffix.length());
 		}
+	}
 
-		std::optional<std::string_view> findLinkToSubtoken(const std::string& htmlPage, std::string_view subtoken, const std::string& capsulationBegin, const std::string& capsulationEnd) const {
-			auto [link_element, link_index] = snip(htmlPage, "<a href", "</a>");
-			while (!link_element.empty()) {
-				const auto [token_element, token_index] = snip_between(link_element, capsulationBegin, capsulationEnd);
+	bool isSubtoken(std::string_view strv, std::string_view subtoken) const {
+		removeSuffix(strv, "<>");
+		removeSuffix(strv, "&lt;&gt;");
 
-				if (isSubtoken(token_element, subtoken)) {
-					const auto [url, url_index] = snip_between(link_element, "\"", "\"");
-					return url;
+		return strv == subtoken;
+	}
+
+	std::optional<std::string_view> findLinkToSubtoken(const std::string& htmlPage, std::string_view subtoken, const std::string& capsulationBegin, const std::string& capsulationEnd) const {
+		const std::string_view link_token_begin = "<a href=\"";
+		const std::string_view link_token_end = "\"";
+
+		const std::string tokenWithCapsulationbegin = capsulationBegin + std::string(subtoken);
+
+		size_t capsulationBegin_pos = htmlPage.find(tokenWithCapsulationbegin);
+		while (capsulationBegin_pos != std::string::npos) {
+			std::string_view token_element = std::string_view(htmlPage);
+			token_element.remove_prefix(capsulationBegin_pos + capsulationBegin.length());
+			
+			const size_t capsulationEnd_pos = token_element.find(capsulationEnd);
+			if (capsulationEnd_pos == std::string::npos) {
+				return {};
+			}
+			token_element.remove_suffix(token_element.length() - capsulationEnd_pos);
+
+			if (isSubtoken(token_element, subtoken)) {
+				std::string_view link = std::string_view(htmlPage);
+				const size_t link_token_begin_pos = link.rfind(link_token_begin, capsulationBegin_pos);
+				if (link_token_begin_pos == std::string::npos) {
+					return {};
 				}
+				link.remove_prefix(link_token_begin_pos + link_token_begin.length());
 
-				std::tie(link_element, link_index) = snip(htmlPage, "<a href", "</a>", link_index);
+
+				const size_t link_token_end_pos = link.find(link_token_end);
+				if (link_token_end_pos == std::string::npos) {
+					return {};
+				}
+				link.remove_suffix(link.length() - link_token_end_pos);
+
+				return link;
 			}
-			return {};
+
+			capsulationBegin_pos = htmlPage.find(tokenWithCapsulationbegin, capsulationBegin_pos + tokenWithCapsulationbegin.length());
 		}
+		return {};
+	}
 };
 
 #endif /* SRC_LINKER_SEARCHBASE_H_ */

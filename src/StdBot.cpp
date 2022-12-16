@@ -1,13 +1,14 @@
 #include <sstream>
 #include <fstream>
 #include <memory>
+#include <csignal>
 
 #include "reddit/Reddit.h"
 #include "Index.h"
 #include "Token.h"
 #include "linker/Linker.h"
 
-Reddit reddit;
+Reddit* reddit;
 Cache<Index> threadCache { std::chrono::hours(24 * 7) };
 std::set<std::string> ignoredUsers;
 
@@ -15,7 +16,7 @@ volatile std::sig_atomic_t receivedSignal = 0;
 std::mutex signalMutex;
 std::thread signalThread;
 
-const std::string signature = "\n\n---\n\n^(Last update: 14.09.21. Last Change: Can now link headers like '<bitset>')[Repo](https://github.com/Narase33/std_bot_cpp)";
+const std::string signature = "\n\n---\n\n^(Last update: 16.12.22. Last Change: Search improvements)[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const std::string& threadId) {
 	Index* index = threadCache.find([&](const Index& i) {
@@ -23,7 +24,7 @@ Index* getIndex(const std::string& threadId) {
 	});
 
 	if (index == nullptr) {
-		const auto& [thread, commentList] = reddit.requestThread(threadId);
+		const auto& [thread, commentList] = reddit->requestThread(threadId);
 		Index newIndex(thread, commentList);
 		index = threadCache.add(newIndex);
 	}
@@ -107,13 +108,13 @@ void lookForBotCommands(const Comment& comment) {
 	if (comment.contains("!std ignore_me")) {
 		ignoredUsers.insert(comment.author);
 		saveData();
-		reddit.comment(comment.fullName, "Alright, not following you anymore" + signature);
+		reddit->comment(comment.fullName, "Alright, not following you anymore" + signature);
 	}
 
 	if (comment.contains("!std follow_me")) {
 		ignoredUsers.erase(comment.author);
 		saveData();
-		reddit.comment(comment.fullName, "Happy to follow you again" + signature);
+		reddit->comment(comment.fullName, "Happy to follow you again" + signature);
 	}
 }
 
@@ -125,7 +126,7 @@ void signalHandler(int signal) {
 void setupSignalHandler() {
 	signalMutex.lock();
 
-	for (auto sig : { SIGABRT, SIGFPE, SIGKILL, SIGINT, SIGSEGV, SIGTERM }) {
+	for (auto sig : { SIGABRT, SIGFPE, SIGINT, SIGSEGV, SIGTERM }) {
 		std::signal(sig, signalHandler);
 	}
 
@@ -140,7 +141,7 @@ void setupSignalHandler() {
 void debugComment(const char* fullName) {
 	Linker linker;
 
-	const Comment comment = reddit.requestComment(fullName);
+	const Comment comment = reddit->requestComment(fullName);
 	std::cout << comment << std::endl;
 
 	// getIndex(comment.threadId)->addToIndex(comment);
@@ -171,27 +172,30 @@ void debugComment(const char* fullName) {
 	spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
 }
 
+void simpleTest(Linker& linker, const std::string& token, std::string_view link) {
+	const LinkedToken* linkedToken = linker.getLinkedToken(Token(token));
+	check(linkedToken->link == link, "'" + token + "' link not found");
+}
+
 void simpleTests() {
 	try {
 		Linker linker;
 
-		const LinkedToken* vector = linker.getLinkedToken(Token("std::vector"));
-		check(vector->link == "https://en.cppreference.com/w/cpp/container/vector", "'std::vector' link not found");
+		simpleTest(linker, "std::vector", "https://en.cppreference.com/w/cpp/container/vector");
+		simpleTest(linker, "std::vector<int>", "https://en.cppreference.com/w/cpp/container/vector");
 
-		const LinkedToken* vector_pushBack = linker.getLinkedToken(Token("std::vector::push_back"));
-		check(vector_pushBack->link == "https://en.cppreference.com/w/cpp/container/vector/push_back", "'std::vector::push_back' link not found");
+		simpleTest(linker, "std::vector::push_back", "https://en.cppreference.com/w/cpp/container/vector/push_back");
+		simpleTest(linker, "std::vector::push_back()", "https://en.cppreference.com/w/cpp/container/vector/push_back");
+		simpleTest(linker, "std::vector<int>::push_back", "https://en.cppreference.com/w/cpp/container/vector/push_back");
+		simpleTest(linker, "std::vector<int>::push_back()", "https://en.cppreference.com/w/cpp/container/vector/push_back");
 
-		const LinkedToken* chrono = linker.getLinkedToken(Token("std::chrono"));
-		check(chrono->link == "https://en.cppreference.com/w/cpp/chrono", "'std::chrono' link not found");
+		simpleTest(linker, "std::numeric_limits<int>::min()", "https://en.cppreference.com/w/cpp/types/numeric_limits/min");
 
-		const LinkedToken* chrono_seconds = linker.getLinkedToken(Token("std::chrono::seconds"));
-		check(chrono_seconds->link == "https://en.cppreference.com/w/cpp/chrono/duration", "'std::chrono::seconds' link not found");
+		simpleTest(linker, "std::chrono", "https://en.cppreference.com/w/cpp/chrono");
+		simpleTest(linker, "std::chrono::seconds", "https://en.cppreference.com/w/cpp/chrono/duration");
+		simpleTest(linker, "std::chrono::duration", "https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search=std%3A%3Achrono%3A%3Aduration");
 
-		const LinkedToken* chrono_duration = linker.getLinkedToken(Token("std::chrono::duration"));
-		check(chrono_duration->link == "https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search=std%3A%3Achrono%3A%3Aduration", "'std::chrono::duration' link not found");
-
-		const LinkedToken* bitset_header = linker.getLinkedToken(Token("<bitset>"));
-		check(bitset_header->link == "https://en.cppreference.com/w/cpp/header/bitset", "bitset header link not found");
+		simpleTest(linker, "<bitset>", "https://en.cppreference.com/w/cpp/header/bitset");
 	} catch (std::runtime_error& e) {
 		spdlog::critical(e.what());
 		std::exit(-1);
@@ -199,21 +203,23 @@ void simpleTests() {
 }
 
 int main() {
+	reddit = new Reddit();
+
 	configureLogger();
 	setupSignalHandler();
 
 	simpleTests();
-	debugComment("t1_hdg7ykk");
+
+	//debugComment("t1_hdg7ykk");
 
 	loadData();
 
 	spdlog::info("Starting bot");
 
 	Linker linker;
-
 	while (true) {
 		try {
-			const std::vector<Comment> comments = reddit.requestNewComments();
+			const std::vector<Comment> comments = reddit->requestNewComments();
 
 			for (const Comment& comment : comments) {
 				spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
@@ -244,7 +250,7 @@ int main() {
 				spdlog::info("Possible reply:\n{}", reply);
 
 				if (isReplyAllowed(comment)) {
-					reddit.comment(comment.fullName, std::move(reply));
+					reddit->comment(comment.fullName, std::move(reply));
 					spdlog::info("Reply sent");
 
 					for (const LinkedToken& t : linkedTokens) {
