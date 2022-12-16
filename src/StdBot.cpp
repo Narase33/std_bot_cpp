@@ -9,7 +9,7 @@
 #include "linker/Linker.h"
 
 Reddit* reddit;
-Cache<Index> threadCache { std::chrono::hours(24 * 7) };
+Cache<Index> threadCache{ std::chrono::hours(24 * 7) };
 std::set<std::string> ignoredUsers;
 
 volatile std::sig_atomic_t receivedSignal = 0;
@@ -52,21 +52,25 @@ void configureLogger() {
 	const auto logLevel = spdlog::level::trace;
 	const char* logPattern = "%Y.%m.%d %H:%M:%S %l | %v";
 
-	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
-	console_sink->set_level(logLevel);
-	console_sink->set_pattern(logPattern);
+	std::vector<spdlog::sink_ptr> sinks;
 
-	auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_st>("logs/log.txt", 0, 0);
+	//auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
+	//console_sink->set_level(logLevel);
+	//console_sink->set_pattern(logPattern);
+	//sinks.push_back(console_sink);
+
+	auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_st>("logs/log.txt", 0, 0, false, 30);
 	file_sink->set_level(logLevel);
 	file_sink->set_pattern(logPattern);
+	sinks.push_back(file_sink);
 
-	std::vector<spdlog::sink_ptr> sinks { console_sink, file_sink };
 	auto logger = std::make_shared<spdlog::logger>("logger", sinks.begin(), sinks.end());
 
 	spdlog::set_default_logger(logger);
 	spdlog::set_level(logLevel);
 	spdlog::flush_on(logLevel);
 }
+
 
 void loadData() {
 	std::ifstream ignoredUsersFile("data/ignored_users.txt");
