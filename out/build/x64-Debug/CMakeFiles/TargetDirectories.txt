@@ -1,8 +1,0 @@
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/CMakeFiles/StdBot.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/libs/json/CMakeFiles/edit_cache.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/libs/json/CMakeFiles/rebuild_cache.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/libs/spdlog/CMakeFiles/spdlog.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/libs/spdlog/CMakeFiles/edit_cache.dir
-C:/Users/mail/Documents/GitHub/std_bot_cpp/out/build/x64-Debug/libs/spdlog/CMakeFiles/rebuild_cache.dir
