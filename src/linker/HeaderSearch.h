@@ -13,7 +13,7 @@
 class HeaderSearch: public SearchBase {
 	public:
 		HeaderSearch(httplib::Client& client) :
-				tokenClient(client) {
+			SearchBase(client) {
 		}
 
 		std::string operator()(const Token& token) {
@@ -21,11 +21,9 @@ class HeaderSearch: public SearchBase {
 				return "";
 			}
 
-			httplib::Result result = tokenClient.Get("/w/cpp/header");
-			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
-			check(result->status == 200, result->reason);
 
-			const std::string transformedHtmlPage = replaceHtmlSymbols(result->body);
+			Page* page = getPage("/w/cpp/header");
+			const std::string transformedHtmlPage = replaceHtmlSymbols(page->content);
 			const std::optional<std::string_view> link = findLinkToSubtoken(transformedHtmlPage, token.content, "<tt>", "</tt>");
 			if (!link.has_value()) {
 				return "";
@@ -33,9 +31,6 @@ class HeaderSearch: public SearchBase {
 
 			return std::string(link.value());
 		}
-
-	private:
-		httplib::Client& tokenClient;
 };
 
 #endif /* SRC_LINKER_HEADERSEARCH_H_ */

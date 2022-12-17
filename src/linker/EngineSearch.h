@@ -13,7 +13,7 @@
 class EngineSearch: public SearchBase {
 	public:
 		EngineSearch(httplib::Client& client) :
-				tokenClient(client) {
+			SearchBase(client) {
 		}
 
 		std::string operator()(const Token& token) {
@@ -52,9 +52,6 @@ class EngineSearch: public SearchBase {
 
 			return std::string(link.value());
 		}
-
-	private:
-		httplib::Client& tokenClient;
 };
 
 #endif /* SRC_LINKER_ENGINESEARCH_H_ */

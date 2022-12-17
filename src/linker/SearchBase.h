@@ -15,8 +15,37 @@
 #include "src/Token.h"
 
 class SearchBase {
+public:
+	SearchBase(httplib::Client& client) :
+		tokenClient(client) {
+	}
 
 protected:
+	httplib::Client& tokenClient;
+
+	struct Page {
+		std::string url;
+		std::string content;
+	};
+
+	Cache<Page> _cache{ std::chrono::hours(24 * 7) };
+
+	Page* getPage(const std::string& url) {
+		Page* page = _cache.tryGet([url](const Page& p) {
+			return p.url == url;
+		});
+
+		if (page == nullptr) {
+			httplib::Result result = tokenClient.Get(url);
+			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
+			check((result->status == 200) or (result->status == 302), result->reason);
+
+			page = _cache.add({ std::move(url), std::move(result->body) });
+		}
+
+		return page;
+	}
+
 	void removeSuffix(std::string_view& strv, std::string_view suffix) const {
 		if (str::ends_with(strv, suffix)) {
 			strv.remove_suffix(suffix.length());
@@ -40,7 +69,7 @@ protected:
 		while (capsulationBegin_pos != std::string::npos) {
 			std::string_view token_element = std::string_view(htmlPage);
 			token_element.remove_prefix(capsulationBegin_pos + capsulationBegin.length());
-			
+
 			const size_t capsulationEnd_pos = token_element.find(capsulationEnd);
 			if (capsulationEnd_pos == std::string::npos) {
 				return {};
