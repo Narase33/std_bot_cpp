@@ -56,6 +56,12 @@ class ResponseBase {
 						tokenEnd++;
 					} else if ((line[tokenEnd] == ':') and (tokenEnd + 1 < line.length()) and (line[tokenEnd + 1] == ':')) {
 						tokenEnd += 2;
+					} else if (line[tokenEnd] == '<') {
+						tokenEnd++;
+						while ((tokenEnd < line.length()) and (line[tokenEnd] != '>')) {
+							tokenEnd++;
+						}
+						tokenEnd++;
 					} else {
 						break;
 					}

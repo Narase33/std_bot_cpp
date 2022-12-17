@@ -152,28 +152,28 @@ void debugComment(const char* fullName) {
 	lookForBotCommands(comment);
 
 	const std::set<Token> tokens = comment.extractTokens();
-	spdlog::info("tokens in comment: {}", str::join("\n", tokens));
+	fmt::print("tokens in comment: {}\n", str::join("\n", tokens));
 
 	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-	spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
+	fmt::print("linked tokens: {}\n", str::join("\n", linkedTokens));
 
 	if (!allLinksKnownInThread(linkedTokens, comment.threadId)) {
-		spdlog::info("No tokens to link");
-		spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+		fmt::print("No tokens to link\n");
+		fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
 		return;
 	}
 
 	std::string reply = replyMessage(linkedTokens);
-	spdlog::info("Possible reply:\n{}", reply);
+	fmt::print("Possible reply:\n{}\n", reply);
 
 	if (isReplyAllowed(comment)) {
 		// reddit.comment(comment.fullName, std::move(reply));
-		spdlog::info("Reply sent");
+		fmt::print("Reply (not) sent\n");
 	} else {
-		spdlog::info("Reply canceled");
+		fmt::print("Reply canceled\n");
 	}
 
-	spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+	fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
 }
 
 void simpleTest(Linker& linker, const std::string& token, std::string_view link) {
@@ -214,7 +214,7 @@ int main() {
 
 	simpleTests();
 
-	//debugComment("t1_hdg7ykk");
+	//debugComment("t1_j0if31o");
 
 	loadData();
 
