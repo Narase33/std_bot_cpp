@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -166,5 +167,22 @@ std::string replaceHtmlSymbols(std::string str) {
 bool canBePartOfIdentifier(char c) { // TODO Name?
 	return std::isalnum(c) or (c == '_');
 }
+
+size_t braceEnd(const std::string& str, size_t index, char begin, char end) {
+	index++;
+
+	int braceCount = 1;
+	while ((index < str.length()) and (braceCount > 0)) {
+		if (str[index] == begin) braceCount++;
+		if (str[index] == end) braceCount--;
+		index++;
+	}
+
+	if (braceCount > 0) {
+		return -1;
+	}
+
+	return index - 1;
+};
 
 #endif /* SRC_TOOLS_H_ */

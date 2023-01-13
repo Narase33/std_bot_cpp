@@ -20,9 +20,9 @@ class Index {
 		Index(const Thread& thread, const std::vector<Comment>& comments) {
 			spdlog::info("indexing new thread id {}", thread.id);
 
-			std::set<std::string> linksfromThread = thread.extractLinks();
+			std::vector<LinkedToken> linksfromThread = thread.extractLinks();
 			spdlog::info("links: {}", str::join("\n", linksfromThread));
-			links.insert(std::make_move_iterator(linksfromThread.begin()),
+			links.insert(links.end(), std::make_move_iterator(linksfromThread.begin()),
 					std::make_move_iterator(linksfromThread.end()));
 
 			std::set<Token> tokensfromThread = thread.extractTokens();
@@ -40,23 +40,26 @@ class Index {
 		void addToIndex(const Comment& newComment) {
 			spdlog::info("indexing comment id {}", newComment.id);
 
-			std::set<std::string> foundLinksInComment = newComment.extractLinks();
+			std::vector<LinkedToken> foundLinksInComment = newComment.extractLinks();
 			spdlog::info("links in comment: {}", str::join("n", foundLinksInComment));
 
-			links.insert(std::make_move_iterator(foundLinksInComment.begin()),
+			links.insert(links.end(), std::make_move_iterator(foundLinksInComment.begin()),
 					std::make_move_iterator(foundLinksInComment.end()));
 		}
 
-		bool addToIndex(const LinkedToken& linkedToken) {
-			return links.insert(linkedToken.link).second | opTokens.insert(linkedToken.token).second;
+		void addToIndex(const LinkedToken& linkedToken) {
+			links.push_back(linkedToken);
+			opTokens.insert(linkedToken.token).second;
 		}
 
-		bool inIndex(const LinkedToken& linkedToken) const {
-			return tokenInIndex(linkedToken.token) or linkInIndex(linkedToken.link);
+		bool inIndex(const Token& token) const {
+			return tokenInIndex(token) or linkInIndex(token);
 		}
 
-		bool linkInIndex(const std::string& link) const {
-			return links.find(link) != links.end();
+		bool linkInIndex(const Token& token) const {
+			return std::find_if(links.begin(), links.end(), [&](const LinkedToken& lt) {
+				return lt.token == token;
+			}) != links.end();
 		}
 
 		bool tokenInIndex(const Token& token) const {
@@ -68,7 +71,7 @@ class Index {
 		}
 	private:
 		std::set<Token> opTokens;
-		std::set<std::string> links;
+		std::vector<LinkedToken> links;
 		std::string threadId;
 };
 

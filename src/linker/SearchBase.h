@@ -11,6 +11,9 @@
 #include <vector>
 #include <optional>
 
+#include <httplib/httplib.h>
+
+#include "src/Cache.h"
 #include "src/Tools.h"
 #include "src/Token.h"
 

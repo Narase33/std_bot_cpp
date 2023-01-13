@@ -35,7 +35,7 @@ Index* getIndex(const std::string& threadId) {
 bool allLinksKnownInThread(const std::set<LinkedToken>& linkedTokens, const std::string& threadId) {
 	Index* index = getIndex(threadId);
 	return std::all_of(linkedTokens.begin(), linkedTokens.end(), [&](const LinkedToken& t) {
-		return index->inIndex(t);
+		return index->inIndex(t.token);
 	});
 }
 
@@ -176,43 +176,11 @@ void debugComment(const char* fullName) {
 	fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
 }
 
-void simpleTest(Linker& linker, const std::string& token, std::string_view link) {
-	const LinkedToken* linkedToken = linker.getLinkedToken(Token(token));
-	check(linkedToken->link == link, "'" + token + "' link not found");
-}
-
-void simpleTests() {
-	try {
-		Linker linker;
-
-		simpleTest(linker, "std::vector", "https://en.cppreference.com/w/cpp/container/vector");
-		simpleTest(linker, "std::vector<int>", "https://en.cppreference.com/w/cpp/container/vector");
-
-		simpleTest(linker, "std::vector::push_back", "https://en.cppreference.com/w/cpp/container/vector/push_back");
-		simpleTest(linker, "std::vector::push_back()", "https://en.cppreference.com/w/cpp/container/vector/push_back");
-		simpleTest(linker, "std::vector<int>::push_back", "https://en.cppreference.com/w/cpp/container/vector/push_back");
-		simpleTest(linker, "std::vector<int>::push_back()", "https://en.cppreference.com/w/cpp/container/vector/push_back");
-
-		simpleTest(linker, "std::numeric_limits<int>::min()", "https://en.cppreference.com/w/cpp/types/numeric_limits/min");
-
-		simpleTest(linker, "std::chrono", "https://en.cppreference.com/w/cpp/chrono");
-		simpleTest(linker, "std::chrono::seconds", "https://en.cppreference.com/w/cpp/chrono/duration");
-		simpleTest(linker, "std::chrono::duration", "https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search=std%3A%3Achrono%3A%3Aduration");
-
-		simpleTest(linker, "<bitset>", "https://en.cppreference.com/w/cpp/header/bitset");
-	} catch (std::runtime_error& e) {
-		spdlog::critical(e.what());
-		std::exit(-1);
-	}
-}
-
 int main() {
+	configureLogger();
 	reddit = new Reddit();
 
-	configureLogger();
 	setupSignalHandler();
-
-	simpleTests();
 
 	//debugComment("t1_j0if31o");
 

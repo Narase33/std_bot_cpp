@@ -9,10 +9,10 @@
 #define SRC_REDDIT_CLIENT_H_
 
 #include <httplib.h>
+#include <chrono>
+
 #include "src/Settings.h"
 #include "src/Tools.h"
-
-#include <chrono>
 
 class Client {
 	public:

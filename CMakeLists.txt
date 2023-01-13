@@ -11,6 +11,7 @@ add_subdirectory("libs/json")
 add_subdirectory("libs/spdlog")
 
 add_executable(StdBot "src/StdBot.cpp")
+add_executable(TestStdBot "test/Test.cpp")
 
 target_include_directories(StdBot PRIVATE
 	SYSTEM "libs/json/include"
@@ -18,7 +19,21 @@ target_include_directories(StdBot PRIVATE
 	SYSTEM "libs/httplib"
 )
 
+target_include_directories(TestStdBot PRIVATE
+	SYSTEM "libs/json/include"
+	SYSTEM "libs/spdlog/include"
+	SYSTEM "libs/httplib"
+	SYSTEM "libs/catch2"
+)
+
 target_link_libraries(StdBot PUBLIC
+	spdlog::spdlog
+	OpenSSL::SSL
+	OpenSSL::Crypto
+	${CMAKE_THREAD_LIBS_INIT}
+)
+
+target_link_libraries(TestStdBot PUBLIC
 	spdlog::spdlog
 	OpenSSL::SSL
 	OpenSSL::Crypto
@@ -62,6 +77,7 @@ set(MSVC_WARNINGS
 	/O0
 	/g3
 	/ggdb
+	/MP
 
 )
 
@@ -73,11 +89,18 @@ set(GCC_WARNINGS
 
 if(WIN32)
 	target_compile_options(StdBot PUBLIC ${MSVC_WARNINGS})
+	target_compile_options(TestStdBot PUBLIC ${MSVC_WARNINGS})
 else()
 	target_compile_options(StdBot PUBLIC ${GCC_WARNINGS})
+	target_compile_options(TestStdBot PUBLIC ${GCC_WARNINGS})
 endif()
 
 target_include_directories(StdBot PUBLIC
+	${CMAKE_SOURCE_DIR}/libs
+	${CMAKE_SOURCE_DIR} 
+)
+
+target_include_directories(TestStdBot PUBLIC
 	${CMAKE_SOURCE_DIR}/libs
 	${CMAKE_SOURCE_DIR} 
 )

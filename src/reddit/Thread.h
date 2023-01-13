@@ -36,7 +36,7 @@ class Thread: public ResponseBase {
 			return extractTokensFromLine(selftext + title);
 		}
 
-		std::set<std::string> extractLinks() const {
+		std::vector<LinkedToken> extractLinks() const {
 			return extractLinksFromLine(selftext + title);
 		}
 

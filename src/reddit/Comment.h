@@ -69,7 +69,7 @@ class Comment: public ResponseBase {
 			return tokens;
 		}
 
-		std::set<std::string> extractLinks() const {
+		std::vector<LinkedToken> extractLinks() const {
 			return extractLinksFromLine(body);
 		}
 

@@ -20,11 +20,31 @@ struct Token {
 			str::replace_all(content, "%3A", ":");
 
 			if (str::starts_with(content, "std::")) {
+				stripToken();
 				type = Type::std;
 			} else if (str::starts_with(content, "<")) {
 				type = Type::header;
 			} else {
 				throw std::runtime_error("unknown token");
+			}
+		}
+
+		void stripToken() {
+			removeBrace('(', ')');
+			removeBrace('<', '>');
+			removeBrace('[', ']');
+			removeBrace('{', '}');
+		}
+
+		void removeBrace(char open, char close) {
+			size_t start = content.find(open);
+			while (start != std::string::npos) {
+				const size_t end = braceEnd(content, start, open, close);
+				if (end == std::string::npos) return;
+
+				content.erase(start, end - start + 1);
+
+				start = content.find(open);
 			}
 		}
 
@@ -42,6 +62,10 @@ struct Token {
 
 		std::string content;
 		Type type;
+
+		static bool isToken(const std::string& str) {
+			return str::starts_with(str, "std::") or (!str.empty() and (str.front() == '<') and (str.back() == '>'));
+		}
 };
 
 struct LinkedToken {

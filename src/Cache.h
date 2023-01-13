@@ -11,6 +11,8 @@
 #include <vector>
 #include <chrono>
 
+#include "src/Tools.h"
+
 template<typename T>
 class Cache {
 	public:
