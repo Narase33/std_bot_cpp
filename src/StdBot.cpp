@@ -16,7 +16,7 @@ volatile std::sig_atomic_t receivedSignal = 0;
 std::mutex signalMutex;
 std::thread signalThread;
 
-const std::string signature = "\n\n---\n\n^(Last update: 16.12.22. Last Change: Search improvements)[Repo](https://github.com/Narase33/std_bot_cpp)";
+const std::string signature = "\n\n---\n\n^(Last update: 13.01.23. Added big test suite and enhanced template recognition)[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const std::string& threadId) {
 	Index* index = threadCache.find([&](const Index& i) {
