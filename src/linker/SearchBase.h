@@ -33,12 +33,17 @@ protected:
 
 	Cache<Page> _cache{ std::chrono::hours(24 * 7) };
 
-	Page* getPage(const std::string& url) {
+	Page* getPage(std::string url) {
 		Page* page = _cache.tryGet([url](const Page& p) {
 			return p.url == url;
 		});
 
-		if (page == nullptr) {
+
+		if (page != nullptr) {
+			spdlog::info("Found '{}' in cache", url);
+		} else {
+			spdlog::info("'{}' not in cache, making request", url);
+
 			httplib::Result result = tokenClient.Get(url);
 			check(result, "Error state: ", httplib::to_string(result.error()), "\n", STD_HERE);
 			check((result->status == 200) or (result->status == 302), result->reason);

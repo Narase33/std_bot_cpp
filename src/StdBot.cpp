@@ -142,47 +142,11 @@ void setupSignalHandler() {
 	});
 }
 
-void debugComment(const char* fullName) {
-	Linker linker;
-
-	const Comment comment = reddit->requestComment(fullName);
-	std::cout << comment << std::endl;
-
-	// getIndex(comment.threadId)->addToIndex(comment);
-	lookForBotCommands(comment);
-
-	const std::set<Token> tokens = comment.extractTokens();
-	fmt::print("tokens in comment: {}\n", str::join("\n", tokens));
-
-	const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-	fmt::print("linked tokens: {}\n", str::join("\n", linkedTokens));
-
-	if (!allLinksKnownInThread(linkedTokens, comment.threadId)) {
-		fmt::print("No tokens to link\n");
-		fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
-		return;
-	}
-
-	std::string reply = replyMessage(linkedTokens);
-	fmt::print("Possible reply:\n{}\n", reply);
-
-	if (isReplyAllowed(comment)) {
-		// reddit.comment(comment.fullName, std::move(reply));
-		fmt::print("Reply (not) sent\n");
-	} else {
-		fmt::print("Reply canceled\n");
-	}
-
-	fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
-}
-
 int main() {
 	configureLogger();
 	reddit = new Reddit();
 
 	setupSignalHandler();
-
-	//debugComment("t1_j0if31o");
 
 	loadData();
 

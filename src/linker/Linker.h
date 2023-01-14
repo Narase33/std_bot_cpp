@@ -21,7 +21,13 @@ class Linker {
 				return linkedToken == token;
 			});
 
-			return entry != nullptr ? entry : searchForLink(token);
+			if (entry != nullptr) {
+				spdlog::info("Found '{}' in cache", token.content);
+			} else {
+				spdlog::info("'{}' not in cache, starting search", token.content);
+				entry = searchForLink(token);
+			}
+			return entry;
 		}
 
 		std::set<LinkedToken> getLinkedTokens(const std::set<Token>& tokens) {

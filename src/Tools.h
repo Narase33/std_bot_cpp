@@ -185,4 +185,15 @@ size_t braceEnd(const std::string& str, size_t index, char begin, char end) {
 	return index - 1;
 };
 
+template<typename T>
+void moveInsert(std::vector<T>&& from, std::vector<T>& to) {
+	to.insert(to.end(), std::make_move_iterator(from.begin()), std::make_move_iterator(from.end()));
+}
+
+template<typename T>
+void moveInsert(std::set<T>&& from, std::set<T>& to) {
+	to.insert(std::make_move_iterator(from.begin()), std::make_move_iterator(from.end()));
+}
+
+
 #endif /* SRC_TOOLS_H_ */

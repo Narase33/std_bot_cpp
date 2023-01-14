@@ -62,11 +62,11 @@ protected:
 				} else if ((line[tokenEnd] == ':') and (tokenEnd + 1 < line.length()) and (line[tokenEnd + 1] == ':')) {
 					tokenEnd += 2;
 				} else if (line[tokenEnd] == '<') {
-					tokenEnd++;
-					while ((tokenEnd < line.length()) and (line[tokenEnd] != '>')) {
-						tokenEnd++;
-					}
-					tokenEnd++;
+					const size_t templateEnd = braceEnd(line, tokenEnd, '<', '>');
+					const std::string templateContent = line.substr(tokenEnd + 1, templateEnd - tokenEnd);
+					std::set<Token> subSet = extractStdTokensFromLine(templateContent);
+					moveInsert(std::move(subSet), tokens);
+					tokenEnd = templateEnd+1;
 				} else {
 					break;
 				}

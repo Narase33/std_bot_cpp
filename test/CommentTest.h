@@ -9,11 +9,11 @@ TEST_CASE("Simple CommentTokenTest Normal") {
 	SECTION("Tokens") {
 		const std::set<Token> extractedTokens = comment.extractTokens();
 
-		REQUIRE(containsToken(extractedTokens, createToken("std::token0", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("std::token1", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("std::token2_0::token2_1::func", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("<header0>", Token::Type::header)));
-		REQUIRE(containsToken(extractedTokens, createToken("<header1>", Token::Type::header)));
+		CHECK(containsToken(extractedTokens, createToken("std::token0", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token1", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token2_0::token2_1::func", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("<header0>", Token::Type::header)));
+		CHECK(containsToken(extractedTokens, createToken("<header1>", Token::Type::header)));
 		REQUIRE(extractedTokens.size() == 5);
 	}
 
@@ -29,11 +29,11 @@ TEST_CASE("Simple CommentTokenTest Marked") {
 	SECTION("Tokens") {
 		const std::set<Token> extractedTokens = comment.extractTokens();
 
-		REQUIRE(containsToken(extractedTokens, createToken("std::token0", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("std::token1", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("std::token2_0::token2_1::func", Token::Type::std)));
-		REQUIRE(containsToken(extractedTokens, createToken("<header0>", Token::Type::header)));
-		REQUIRE(containsToken(extractedTokens, createToken("<header1>", Token::Type::header)));
+		CHECK(containsToken(extractedTokens, createToken("std::token0", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token1", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token2_0::token2_1::func", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("<header0>", Token::Type::header)));
+		CHECK(containsToken(extractedTokens, createToken("<header1>", Token::Type::header)));
 		REQUIRE(extractedTokens.size() == 5);
 	}
 
@@ -110,6 +110,45 @@ TEST_CASE("Template CommentTokenTest") {
 		CHECK(containsToken(extractedTokens, createToken("std::token14_0::token14_1::func", Token::Type::std)));
 		CHECK(containsToken(extractedTokens, createToken("std::token15_0::token15_1::func", Token::Type::std)));
 		REQUIRE(extractedTokens.size() == 16);
+	}
+
+	SECTION("Links") {
+		const std::vector<LinkedToken> extractedLinks = comment.extractLinks();
+		REQUIRE(extractedLinks.size() == 0);
+	}
+}
+
+TEST_CASE("Template CommentRecursiveTokenTest") {
+	std::string content = R"(
+std::token0_0<
+	std::token1_0<
+		std::token2_0,
+		std::token2_1<T0>,
+		std::token2_2::func()
+	>,
+	std::token1_1<T1>,
+	std::token1_2::func()
+>
+::func<T1>()
+)";
+
+	std::remove_if(content.begin(), content.end(), [](char c) {
+		return std::isspace(c);
+	});
+
+	const Comment comment(createCommentJson(content));
+
+	SECTION("Tokens") {
+		const std::set<Token> extractedTokens = comment.extractTokens();
+
+		CHECK(containsToken(extractedTokens, createToken("std::token0_0::func", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token1_0", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token1_1", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token1_2::func", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token2_0", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token2_1", Token::Type::std)));
+		CHECK(containsToken(extractedTokens, createToken("std::token2_2::func", Token::Type::std)));
+		REQUIRE(extractedTokens.size() == 7);
 	}
 
 	SECTION("Links") {

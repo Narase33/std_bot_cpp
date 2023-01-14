@@ -22,13 +22,11 @@ class Index {
 
 			std::vector<LinkedToken> linksfromThread = thread.extractLinks();
 			spdlog::info("links: {}", str::join("\n", linksfromThread));
-			links.insert(links.end(), std::make_move_iterator(linksfromThread.begin()),
-					std::make_move_iterator(linksfromThread.end()));
+			moveInsert(std::move(linksfromThread), links);
 
 			std::set<Token> tokensfromThread = thread.extractTokens();
 			spdlog::info("tokens: {}", str::join("\n", tokensfromThread));
-			opTokens.insert(std::make_move_iterator(tokensfromThread.begin()),
-					std::make_move_iterator(tokensfromThread.end()));
+			moveInsert(std::move(tokensfromThread), opTokens);
 
 			for (const Comment& comment : comments) {
 				addToIndex(comment);
@@ -43,8 +41,7 @@ class Index {
 			std::vector<LinkedToken> foundLinksInComment = newComment.extractLinks();
 			spdlog::info("links in comment: {}", str::join("n", foundLinksInComment));
 
-			links.insert(links.end(), std::make_move_iterator(foundLinksInComment.begin()),
-					std::make_move_iterator(foundLinksInComment.end()));
+			moveInsert(std::move(foundLinksInComment), links);
 		}
 
 		void addToIndex(const LinkedToken& linkedToken) {
