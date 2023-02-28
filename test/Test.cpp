@@ -4,17 +4,17 @@
 #include "catch.hpp"
 
 #include "CommentTest.h"
-#include "ThreadTest.h"
 #include "IndexerTest.h"
 #include "LinkerTest.h"
+#include "ThreadTest.h"
 
 int main(int argc, char* argv[]) {
-	spdlog::set_level(spdlog::level::off);
+    spdlog::set_level(spdlog::level::off);
 
-	Catch::Session session;
-	session.configData().showSuccessfulTests = false;
-	session.configData().showDurations = Catch::ShowDurations::Always;
-	const int testReturn = session.run(argc, argv);
+    Catch::Session session;
+    session.configData().showSuccessfulTests = false;
+    session.configData().showDurations = Catch::ShowDurations::Always;
+    const int testReturn = session.run(argc, argv);
 
-	return testReturn;
+    return testReturn;
 }
