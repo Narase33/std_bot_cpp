@@ -185,7 +185,7 @@ int main() {
 
     setupSignalHandler();
 
-    debugComment("t1_j9d5fn3");
+    // debugComment("t1_j9d5fn3");
 
     loadData();
 
