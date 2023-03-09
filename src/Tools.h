@@ -165,7 +165,19 @@ std::string replaceHtmlSymbols(std::string str) {
 }
 
 bool canBePartOfIdentifier(char c) { // TODO Name?
-    return std::isalnum(c) or (c == '_');
+    switch (c) {
+        case '_':
+        case ':':
+        case '<':
+        case '>':
+        case '(':
+        case ')':
+        case '[':
+        case ']':
+            return true;
+        default:
+            return std::isalnum(c);
+    }
 }
 
 size_t braceEnd(const std::string& str, size_t index, char begin, char end) {

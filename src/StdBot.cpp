@@ -16,8 +16,7 @@ volatile std::sig_atomic_t receivedSignal = 0;
 std::mutex signalMutex;
 std::thread signalThread;
 
-const std::string signature = "\n\n---\n\n^(Last update: 13.01.23. Added big test suite and enhanced "
-                              "template recognition)[Repo](https://github.com/Narase33/std_bot_cpp)";
+const std::string signature = "\n\n---\n\n^(Last update: 09.03.23 -> Bug fixes)[Repo](https://github.com/Narase33/std_bot_cpp)";
 
 Index* getIndex(const std::string& threadId) {
     Index* index = threadCache.find([&](const Index& i) {
@@ -149,32 +148,43 @@ void debugComment(const char* fullName) {
     const Comment comment = reddit->requestComment(fullName);
     std::cout << comment << std::endl;
 
-    // getIndex(comment.threadId)->addToIndex(comment);
+    spdlog::info("{}\n\n\n\n\n", std::string(40, '-'));
+
+    spdlog::info("new comment:\n{}", comment.toString());
+    Index* index = getIndex(comment.threadId);
+
+    index->addToIndex(comment);
     lookForBotCommands(comment);
 
     const std::set<Token> tokens = comment.extractTokens();
-    fmt::print("tokens in comment: {}\n", str::join("\n", tokens));
+    if (tokens.size() == 0) {
+        spdlog::info("no tokens in comment");
+        return;
+    }
+
+    spdlog::info("tokens in comment: {}", str::join("\n", tokens));
 
     const std::set<LinkedToken> linkedTokens = linker.getLinkedTokens(tokens);
-    fmt::print("linked tokens: {}\n", str::join("\n", linkedTokens));
+    spdlog::info("linked tokens: {}", str::join("\n", linkedTokens));
 
-    if (!allLinksKnownInThread(linkedTokens, comment.threadId)) {
-        fmt::print("No tokens to link\n");
-        fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
+    if (allLinksKnownInThread(linkedTokens, comment.threadId)) {
+        spdlog::info("No tokens to link");
         return;
     }
 
     std::string reply = replyMessage(linkedTokens);
-    fmt::print("Possible reply:\n{}\n", reply);
+    spdlog::info("Possible reply:\n{}", reply);
 
     if (isReplyAllowed(comment)) {
-        // reddit.comment(comment.fullName, std::move(reply));
-        fmt::print("Reply (not) sent\n");
-    } else {
-        fmt::print("Reply canceled\n");
-    }
+        //reddit->comment(comment.fullName, std::move(reply));
+        spdlog::info("Reply sent");
 
-    fmt::print("{}\n\n\n\n\n", std::string(40, '-'));
+        for (const LinkedToken& t : linkedTokens) {
+            index->addToIndex(t);
+        }
+    } else {
+        spdlog::info("Reply canceled");
+    }
 
     std::exit(0);
 }
@@ -185,7 +195,7 @@ int main() {
 
     setupSignalHandler();
 
-    // debugComment("t1_j9d5fn3");
+    debugComment("t1_jbj1if1");
 
     loadData();
 

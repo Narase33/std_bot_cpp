@@ -41,6 +41,20 @@ class ResponseBase {
                 }
 
                 std::string text = line.substr(textBegin, textEnd - textBegin);
+                const auto tokenBegin = std::find_if(text.begin(), text.end(), [](char c) {
+                    return canBePartOfIdentifier(c);
+                });
+                if ((tokenBegin != text.begin()) and (tokenBegin != text.end())) {
+                    text.erase(text.begin(), tokenBegin);
+                }
+
+                const auto tokenEnd = std::find_if(text.rbegin(), text.rend(), [](char c) {
+                    return canBePartOfIdentifier(c);
+                });
+                if ((tokenEnd != text.rbegin()) and (tokenEnd != text.rend())) {
+                    text.erase(tokenEnd.base(), text.end());
+                }
+
                 if (Token::isToken(text)) {
                     std::string link = line.substr(linkBegin, linkEnd - linkBegin);
                     links.push_back(LinkedToken(Token(std::move(text)), std::move(link)));
@@ -101,13 +115,13 @@ class ResponseBase {
 
         size_t tokenBegin = line.find(tokenStartChar);
         while (tokenBegin != std::string::npos) {
-            if ((tokenBegin > 0) and canBePartOfIdentifier(line[tokenBegin - 1])) {
+            if ((tokenBegin > 0) and (std::isalnum(line[tokenBegin - 1])) or (line[tokenBegin - 1] == '_')) {
                 tokenBegin = line.find(tokenStartChar, tokenBegin + 1);
                 continue;
             }
 
             size_t tokenEnd = tokenBegin + 1;
-            while ((tokenEnd < line.length()) and canBePartOfIdentifier(line[tokenEnd])) {
+            while ((tokenEnd < line.length()) and (std::isalnum(line[tokenEnd])) or (line[tokenEnd] == '_')) {
                 tokenEnd++;
             }
 
