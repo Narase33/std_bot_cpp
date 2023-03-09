@@ -176,7 +176,7 @@ void debugComment(const char* fullName) {
     spdlog::info("Possible reply:\n{}", reply);
 
     if (isReplyAllowed(comment)) {
-        //reddit->comment(comment.fullName, std::move(reply));
+        // reddit->comment(comment.fullName, std::move(reply));
         spdlog::info("Reply sent");
 
         for (const LinkedToken& t : linkedTokens) {
@@ -195,7 +195,7 @@ int main() {
 
     setupSignalHandler();
 
-    debugComment("t1_jbj1if1");
+    // debugComment("t1_jbj1if1");
 
     loadData();
 
