@@ -81,18 +81,18 @@ set(MSVC_WARNINGS
 
 )
 
-set(GCC_WARNINGS
-	-Wno-psabi
-	-O0
-	-DCPPHTTPLIB_OPENSSL_SUPPORT
-)
-
 if(WIN32)
 	target_compile_options(StdBot PUBLIC ${MSVC_WARNINGS})
 	target_compile_options(TestStdBot PUBLIC ${MSVC_WARNINGS})
 else()
-	target_compile_options(StdBot PUBLIC ${GCC_WARNINGS})
-	target_compile_options(TestStdBot PUBLIC ${GCC_WARNINGS})
+	target_compile_options(StdBot PUBLIC
+		-O3
+		-DCPPHTTPLIB_OPENSSL_SUPPORT
+	)
+
+	target_compile_options(TestStdBot PUBLIC
+		-DCPPHTTPLIB_OPENSSL_SUPPORT
+	)
 endif()
 
 target_include_directories(StdBot PUBLIC
