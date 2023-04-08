@@ -11,7 +11,12 @@ add_subdirectory("libs/json")
 add_subdirectory("libs/spdlog")
 
 add_executable(StdBot "src/StdBot.cpp")
-add_executable(TestStdBot "test/Test.cpp")
+add_executable(TestStdBot "test/Test.cpp"
+	"test/CommentTest.cpp"
+	"test/IndexerTest.cpp"
+	"test/LinkerTest.cpp"
+	"test/ThreadTest.cpp"
+)
 
 target_include_directories(StdBot PRIVATE
 	SYSTEM "libs/json/include"
@@ -91,6 +96,7 @@ else()
 	)
 
 	target_compile_options(TestStdBot PUBLIC
+		-O0
 		-DCPPHTTPLIB_OPENSSL_SUPPORT
 	)
 endif()

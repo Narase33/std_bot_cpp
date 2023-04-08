@@ -2,11 +2,7 @@
 #define CATCH_CONFIG_CONSOLE_WIDTH 200
 
 #include "catch.hpp"
-
-#include "CommentTest.h"
-#include "IndexerTest.h"
-#include "LinkerTest.h"
-#include "ThreadTest.h"
+#include "spdlog/spdlog.h"
 
 int main(int argc, char* argv[]) {
     spdlog::set_level(spdlog::level::off);

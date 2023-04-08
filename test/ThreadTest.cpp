@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TestTools.h"
-#include "catch.hpp"
 
 TEST_CASE("Simple ThreadTokenTest Normal") {
     const Thread thread = createThreadJson("std::token0 std::token1 std::token2_0<T0>::token2_1<T1>::func<T2>() <header0> <header1>");
