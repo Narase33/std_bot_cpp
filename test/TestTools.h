@@ -1,10 +1,12 @@
 #pragma once
 
+#include <catch.hpp>
+
 #include "../src/Token.h"
 #include "../src/reddit/Comment.h"
 #include "../src/reddit/Thread.h"
 
-Json createCommentJson(std::string body) {
+inline Json createCommentJson(std::string body) {
     Json commentAsJson;
     commentAsJson["id"] = "id_0";
     commentAsJson["author"] = "author_0";
@@ -17,7 +19,7 @@ Json createCommentJson(std::string body) {
     return commentAsJson;
 }
 
-Json createThreadJson(std::string body) {
+inline Json createThreadJson(std::string body) {
     Json threadAsJson;
     threadAsJson["id"] = "id_0";
     threadAsJson["selftext"] = std::move(body);
@@ -26,14 +28,14 @@ Json createThreadJson(std::string body) {
     return threadAsJson;
 }
 
-Token createToken(std::string content, Token::Type type) {
+inline Token createToken(std::string content, Token::Type type) {
     Token t("std::move");
     t.content = std::move(content);
     t.type = type;
     return t;
 }
 
-LinkedToken createLinkedToken(std::string content, Token::Type type, std::string link) {
+inline LinkedToken createLinkedToken(std::string content, Token::Type type, std::string link) {
     Token t("std::move");
     t.content = std::move(content);
     t.type = type;
@@ -41,7 +43,7 @@ LinkedToken createLinkedToken(std::string content, Token::Type type, std::string
     return LinkedToken(std::move(t), std::move(link));
 }
 
-bool containsToken(const std::set<Token>& tokens, const Token& tokenToFind) {
+inline bool containsToken(const std::set<Token>& tokens, const Token& tokenToFind) {
     UNSCOPED_INFO("ToFind: " + tokenToFind.content);
     for (const Token& t : tokens) {
         UNSCOPED_INFO("In list: " + t.content);
@@ -52,7 +54,7 @@ bool containsToken(const std::set<Token>& tokens, const Token& tokenToFind) {
     }) != tokens.end();
 }
 
-bool containsLinkedToken(const std::vector<LinkedToken>& linkedTokens, const LinkedToken& linkedTokenToFind) {
+inline bool containsLinkedToken(const std::vector<LinkedToken>& linkedTokens, const LinkedToken& linkedTokenToFind) {
     UNSCOPED_INFO("ToFind: " + linkedTokenToFind.toLink());
     for (const LinkedToken& lt : linkedTokens) {
         UNSCOPED_INFO("In list: " + lt.toLink());

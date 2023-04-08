@@ -1,7 +1,4 @@
-#pragma once
-
 #include "TestTools.h"
-#include "catch.hpp"
 
 #include "src/Index.h"
 #include "src/linker/Linker.h"

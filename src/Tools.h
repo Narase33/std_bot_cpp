@@ -8,6 +8,8 @@
 #ifndef SRC_TOOLS_H_
 #define SRC_TOOLS_H_
 
+#include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -44,7 +46,7 @@ namespace str {
         return stream.str();
     }
 
-    std::vector<std::string_view> split(std::string_view str, std::string_view delimiter) {
+    inline std::vector<std::string_view> split(std::string_view str, std::string_view delimiter) {
         std::vector<std::string_view> tokens;
 
         if (str.empty()) {
@@ -80,7 +82,7 @@ namespace str {
         return stream.str();
     }
 
-    void replace_all(std::string& str, std::string_view find, std::string_view replacement) {
+    inline void replace_all(std::string& str, std::string_view find, std::string_view replacement) {
         size_t pos = str.find(find, 0);
         while (pos != std::string::npos) {
             str.replace(pos, find.length(), replacement);
@@ -88,7 +90,7 @@ namespace str {
         }
     }
 
-    bool starts_with(std::string_view str, std::string_view content) {
+    inline bool starts_with(std::string_view str, std::string_view content) {
         if (str.length() < content.length()) {
             return false;
         }
@@ -105,7 +107,7 @@ namespace str {
         return true;
     }
 
-    bool ends_with(std::string_view str, std::string_view content) {
+    inline bool ends_with(std::string_view str, std::string_view content) {
         if (str.length() < content.length()) {
             return false;
         }
@@ -130,7 +132,7 @@ void check(bool condition, T1&& t1, T2&&... t2) {
     }
 }
 
-std::pair<std::string_view, size_t> snip(std::string_view source, const std::string& from, const std::string& to, size_t start = 0) {
+inline std::pair<std::string_view, size_t> snip(std::string_view source, const std::string& from, const std::string& to, size_t start = 0) {
     const size_t begin = source.find(from, start);
     if (begin != std::string::npos) {
         const size_t end = source.find(to, begin + from.length());
@@ -142,7 +144,7 @@ std::pair<std::string_view, size_t> snip(std::string_view source, const std::str
     return { "", 0 };
 }
 
-std::pair<std::string_view, size_t> snip_between(std::string_view source, const std::string& from, const std::string& to, size_t start = 0) {
+inline std::pair<std::string_view, size_t> snip_between(std::string_view source, const std::string& from, const std::string& to, size_t start = 0) {
     const size_t begin = source.find(from, start);
     if (begin != std::string::npos) {
         const size_t end = source.find(to, begin + from.length());
@@ -154,7 +156,7 @@ std::pair<std::string_view, size_t> snip_between(std::string_view source, const 
     return { "", 0 };
 }
 
-std::string replaceHtmlSymbols(std::string str) {
+inline std::string replaceHtmlSymbols(std::string str) {
     str::replace_all(str, "&amp;", "&");
     str::replace_all(str, "&quot;", "\"");
     str::replace_all(str, "&apos;", "'");
@@ -164,7 +166,7 @@ std::string replaceHtmlSymbols(std::string str) {
     return str;
 }
 
-bool canBePartOfIdentifier(char c) { // TODO Name?
+inline bool canBePartOfIdentifier(char c) { // TODO Name?
     switch (c) {
         case '_':
         case ':':
@@ -180,7 +182,7 @@ bool canBePartOfIdentifier(char c) { // TODO Name?
     }
 }
 
-size_t braceEnd(const std::string& str, size_t index, char begin, char end) {
+inline size_t braceEnd(const std::string& str, size_t index, char begin, char end) {
     index++;
 
     int braceCount = 1;
